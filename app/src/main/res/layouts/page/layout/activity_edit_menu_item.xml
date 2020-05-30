@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey_5"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tbar_fm_tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".page.CreateOrEditBusinessItemActivity">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/activity_vertical_margin"
+                android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_aami_card_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:scrollbars="none"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/list_item_image_view_holder_card" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_aami_item_name"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/primary_margin"
+                    android:layout_marginBottom="@dimen/primary_margin"
+                    android:hint="Item name"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="30"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textButton">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tiet_aami_item_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+                        android:inputType="textFilter"
+                        android:maxLength="30"
+                        android:maxLines="1" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_aami_categories"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/white"
+                    android:hint="Category"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="30">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actv_aami_categories"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_aami_price"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/primary_margin"
+                    android:layout_marginBottom="@dimen/primary_margin"
+                    android:hint="Price"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textButton">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tiet_aami_price"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_aami_description"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/primary_margin"
+                    android:layout_marginBottom="@dimen/primary_margin"
+                    android:hint="Description"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="150"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textButton">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tiet_aami_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:maxLength="150" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/primary_margin"
+                    android:text="Choose a type of discount and value"
+                    android:textSize="@dimen/sp_sub1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/primary_margin"
+                    android:layout_marginBottom="@dimen/primary_margin"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_aami_discount_type"
+                        style="@style/Widget.MaterialComponents.Button.Icon"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/primary_margin"
+                        android:layout_weight="1"
+                        android:text="No discount"
+                        app:icon="@drawable/ic_arrow_drop_down_black_24dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/til_aami_discount_value"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/primary_margin"
+                        android:layout_weight="1"
+                        android:hint="Value"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textButton">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tiet_aami_discount_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:enabled="false"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_aami_tax"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/primary_margin"
+                    android:layout_marginBottom="@dimen/primary_margin"
+                    android:hint="Taxes"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textButton">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tiet_aami_tax"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/primary_margin"
+                    android:layout_marginBottom="@dimen/primary_margin"
+                    android:text="Final amount: 246"
+                    android:textSize="@dimen/sp_sub1"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_aami_cancel"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/primary_margin"
+                        android:text="Cancel" />
+
+                    <Button
+                        android:id="@+id/btn_aami_submit"
+                        style="@style/Widget.MaterialComponents.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/primary_margin"
+                        android:text="Submit" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/pbar_aami_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="invisible" />
+        </FrameLayout>
+    </ScrollView>
+</LinearLayout>
