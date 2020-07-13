@@ -20,6 +20,10 @@ public class MessageUtils {
         Snackbar.make(view, message, Snackbar.LENGTH_INDEFINITE).setAction(actionMsg, view1 -> onSnackbarActionListener.onSnackBarActionClicked(view1, requestCode)).show();
     }
 
+    public static void showActionShortSnackBar(View view, String message, String actionMsg, int requestCode, OnSnackBarActionListener onSnackbarActionListener) {
+        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).setAction(actionMsg, view1 -> onSnackbarActionListener.onSnackBarActionClicked(view1, requestCode)).show();
+    }
+
     public void showLongToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }

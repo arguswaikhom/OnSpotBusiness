@@ -215,9 +215,11 @@ public class SignInActivity extends AppCompatActivity implements MessageUtils.On
                 } catch (ApiException e) {
                     MessageUtils.showActionIndefiniteSnackBar(mParentView, "Sign in failed", "RETRY", RC_SIGN_IN, SignInActivity.this);
                     Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
+                    Log.v(TAG, "Error: " + e.getMessage());
                 } catch (Exception e) {
                     MessageUtils.showActionIndefiniteSnackBar(mParentView, "Sign in failed", "RETRY", RC_SIGN_IN, SignInActivity.this);
                     Log.w(TAG, "signInResult:failed=" + Arrays.toString(e.getStackTrace()));
+                    Log.v(TAG, "Error: " + e.getMessage());
                 }
                 break;
             }

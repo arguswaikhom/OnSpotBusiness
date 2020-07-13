@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
@@ -18,13 +17,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.controller.clickHandler.EditMenuItemCH;
 import com.crown.onspotbusiness.model.MenuItem;
 import com.crown.onspotbusiness.model.MenuItemImage;
 import com.crown.onspotbusiness.utils.ImagePicker;
-import com.crown.onspotbusiness.utils.MockData;
-import com.crown.onspotbusiness.utils.abstracts.ListItem;
 import com.crown.onspotbusiness.utils.abstracts.OnCardImageRemove;
 import com.crown.onspotbusiness.view.ListItemAdapter;
 import com.google.android.material.textfield.TextInputEditText;
@@ -39,10 +37,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CreateOrEditBusinessItemActivity extends AppCompatActivity implements TextWatcher, OnCardImageRemove {
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class CreateItemActivity extends AppCompatActivity implements TextWatcher, OnCardImageRemove {
 
     public static final String KEY_MENU_ITEM = "MENU_ITEM";
-    private static final String TAG = CreateOrEditBusinessItemActivity.class.getName();
+    private static final String TAG = CreateItemActivity.class.getName();
     private ListItemAdapter mAdapter;
 
     private TextInputLayout mItemNameTIL;
@@ -54,6 +55,8 @@ public class CreateOrEditBusinessItemActivity extends AppCompatActivity implemen
     private TextInputEditText mPriceTIET;
     private TextInputEditText mDiscountValueTIET;
     private TextInputEditText mTaxTIET;
+    @BindView(R.id.tiet_aami_description)
+    TextInputEditText mDescriptionTIEL;
     private AutoCompleteTextView mItemCategoryACTV;
     private Button mDiscountTypeBtn;
 
@@ -65,6 +68,7 @@ public class CreateOrEditBusinessItemActivity extends AppCompatActivity implemen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_menu_item);
+        ButterKnife.bind(this);
 
         Toolbar toolbar = findViewById(R.id.tbar_fm_tool_bar);
         setSupportActionBar(toolbar);
@@ -79,7 +83,7 @@ public class CreateOrEditBusinessItemActivity extends AppCompatActivity implemen
         setUpRecycler();
         initiateUI();
         if (hasEditMode) setUpUi();
-        // getCategory();
+        getCategory();
     }
 
     private void setUpRecycler() {
@@ -106,6 +110,7 @@ public class CreateOrEditBusinessItemActivity extends AppCompatActivity implemen
         mPriceTIET.setText(String.format(Locale.ENGLISH, "%d", item.getPrice()));
         mDiscountValueTIET.setText(String.format(Locale.ENGLISH, "%d", item.getDiscountValue()));
         mTaxTIET.setText(String.format(Locale.ENGLISH, "%d", item.getTax()));
+        mDescriptionTIEL.setText(item.getDescription());
 
         MenuItem.Discount discount = item.getDiscountType();
         mDiscountTypeBtn.setText(discount.toString().replace("_", " "));
@@ -115,8 +120,7 @@ public class CreateOrEditBusinessItemActivity extends AppCompatActivity implemen
     }
 
     private void getCategory() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, MockData.categories());
-        mItemCategoryACTV.setAdapter(adapter);
+        // TODO: Get item categories and show
     }
 
     public MenuItem getItem() {

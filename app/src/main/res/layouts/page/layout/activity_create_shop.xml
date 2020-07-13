@@ -64,7 +64,7 @@
                             android:id="@+id/tiet_acs_display_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:digits=" ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+                            android:digits=" .,ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
                             android:inputType="textFilter"
                             android:maxLength="40"
                             android:maxLines="1" />
