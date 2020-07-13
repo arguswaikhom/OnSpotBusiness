@@ -15,16 +15,16 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 
+import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.controller.AppController;
 import com.crown.onspotbusiness.model.MenuItem;
 import com.crown.onspotbusiness.model.MenuItemImage;
 import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.page.CreateOrEditBusinessItemActivity;
+import com.crown.onspotbusiness.page.CreateItemActivity;
 import com.crown.onspotbusiness.utils.ImagePicker;
 import com.crown.onspotbusiness.utils.InputFilterMinMax;
 import com.crown.onspotbusiness.utils.MessageUtils;
-import com.crown.onspotbusiness.utils.abstracts.ListItem;
 import com.crown.onspotbusiness.utils.compression.ImageCompression;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
@@ -151,10 +151,10 @@ public class EditMenuItemCH implements View.OnClickListener {
             return;
         }
 
-        List<ListItem> images = ((CreateOrEditBusinessItemActivity) mActivity).getImageUris();
+        List<ListItem> images = ((CreateItemActivity) mActivity).getImageUris();
         if (images == null || images.size() == 0) {
             String message = "At least add an image";
-            MessageUtils.showActionIndefiniteSnackBar(mActivity.findViewById(android.R.id.content), message, "ADD IMAGE", 0, (view, requestCode) -> {
+            MessageUtils.showActionShortSnackBar(mActivity.findViewById(android.R.id.content), message, "ADD IMAGE", 0, (view, requestCode) -> {
                 new ImagePicker(mActivity, ImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
             });
             return;
@@ -164,8 +164,8 @@ public class EditMenuItemCH implements View.OnClickListener {
         double discountValue = 0;
         double tax = 0;
 
-        String discountType = mDiscountTypeBtn.getText().toString().replace(" ", "_");
-        if (!discountType.equals(MenuItem.Discount.NO_DISCOUNT.toString())) {
+        String discountType = mDiscountTypeBtn.getText().toString().replace(" ", "_").toUpperCase();
+        if (!discountType.equalsIgnoreCase(MenuItem.Discount.NO_DISCOUNT.toString())) {
             if (TextUtils.isEmpty(discountValueStr)) {
                 mDiscountValueTIL.setError("Input require");
                 return;
@@ -238,7 +238,7 @@ public class EditMenuItemCH implements View.OnClickListener {
     }
 
     private void uploadItemImages(String refId) {
-        List<MenuItemImage> imageUris = (List<MenuItemImage>) (List<?>) ((CreateOrEditBusinessItemActivity) mActivity).getImageUris();
+        List<MenuItemImage> imageUris = (List<MenuItemImage>) (List<?>) ((CreateItemActivity) mActivity).getImageUris();
 
         String businessRefId = Preferences.getInstance(mActivity.getApplicationContext()).getObject(PreferenceKey.USER, User.class).getBusinessRefId();
         String userId = AppController.getInstance().getFirebaseAuth().getUid();

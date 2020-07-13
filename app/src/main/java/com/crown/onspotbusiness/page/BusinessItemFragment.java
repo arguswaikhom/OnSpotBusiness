@@ -18,10 +18,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.model.MenuItem;
 import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.utils.abstracts.ListItem;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.crown.onspotbusiness.view.ListItemAdapter;
@@ -91,7 +91,7 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
     @Override
     public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
         if (item.getItemId() == R.id.nav_mio_add_item) {
-            Intent intent = new Intent(getContext(), CreateOrEditBusinessItemActivity.class);
+            Intent intent = new Intent(getContext(), CreateItemActivity.class);
             startActivity(intent);
         }
         return super.onOptionsItemSelected(item);

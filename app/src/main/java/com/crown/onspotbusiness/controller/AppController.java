@@ -2,13 +2,11 @@ package com.crown.onspotbusiness.controller;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -81,11 +79,13 @@ public class AppController extends Application {
 
     public <T> void addToRequestQueue(Request<T> req, String tag) {
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+        req.setRetryPolicy(new DefaultRetryPolicy(0, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         getRequestQueue().add(req);
     }
 
     public <T> void addToRequestQueue(Request<T> req) {
         req.setTag(TAG);
+        req.setRetryPolicy(new DefaultRetryPolicy(0, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         getRequestQueue().add(req);
     }
 
@@ -93,12 +93,6 @@ public class AppController extends Application {
         if (mRequestQueue != null) {
             mRequestQueue.cancelAll(tag);
         }
-    }
-
-    public boolean isInternetAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return (connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
-                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED);
     }
 
     public boolean isAuthenticated() {
@@ -117,14 +111,9 @@ public class AppController extends Application {
         Business business = preferences.getObject(PreferenceKey.BUSINESS, Business.class);
 
         if (token != null && business != null) {
-            FirebaseFirestore.getInstance().collection(getString(R.string.ref_business)).document(business.getBusinessRefId())
-                    .update(getString(R.string.field_device_token), FieldValue.arrayRemove(token))
-                    .addOnSuccessListener(v -> {
-                        clearContent(activity);
-                    });
-        } else {
-            clearContent(activity);
+            FirebaseFirestore.getInstance().collection(getString(R.string.ref_business)).document(business.getBusinessRefId()).update(getString(R.string.field_device_token), FieldValue.arrayRemove(token));
         }
+        clearContent(activity);
     }
 
     private void clearContent(Activity activity) {
@@ -133,6 +122,7 @@ public class AppController extends Application {
         setFirebaseAuth(null);
         setGoogleSignInClient(null);
         Preferences.getInstance(getApplicationContext()).clearAll();
+        getRequestQueue().getCache().clear();
         // ClearCacheData.clear(this);
 
         try {

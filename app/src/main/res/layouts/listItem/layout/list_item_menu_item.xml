@@ -19,7 +19,7 @@
         android:orientation="vertical"
         android:showDividers="middle">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/primary_margin"
@@ -32,13 +32,15 @@
                 android:layout_height="50dp"
                 android:layout_gravity="center"
                 android:contentDescription="@null"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                tools:src="@color/colorPrimaryDark" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/activity_vertical_margin"
-                android:layout_marginEnd="@dimen/primary_margin"
+                android:layout_toStartOf="@+id/ibtn_mi_more_overflow"
+                android:layout_toEndOf="@+id/iv_mi_image"
                 android:orientation="vertical">
 
                 <TextView
@@ -57,6 +59,7 @@
                     android:id="@+id/ll_mi_ratings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:orientation="horizontal"
                     android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -77,26 +80,20 @@
                         android:layout_marginEnd="@dimen/primary_margin"
                         android:gravity="center"
                         android:text="(279)" />
-
                 </LinearLayout>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+            </LinearLayout>
 
             <ImageButton
                 android:id="@+id/ibtn_mi_more_overflow"
                 style="?android:attr/actionOverflowButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:layout_gravity="center_vertical"
                 android:clickable="true"
                 android:focusable="true"
                 android:tint="@android:color/black" />
-        </LinearLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

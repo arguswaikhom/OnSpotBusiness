@@ -3,9 +3,8 @@ package com.crown.onspotbusiness.model;
 import androidx.annotation.NonNull;
 
 import com.google.firebase.Timestamp;
+import com.google.firebase.database.annotations.NotNull;
 import com.google.gson.Gson;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 

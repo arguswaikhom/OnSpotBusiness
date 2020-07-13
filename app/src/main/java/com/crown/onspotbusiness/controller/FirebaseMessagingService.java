@@ -6,11 +6,11 @@ import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.model.User;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
+import com.google.firebase.database.annotations.NotNull;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.RemoteMessage;
 
-import org.jetbrains.annotations.NotNull;
 
 public class FirebaseMessagingService extends com.google.firebase.messaging.FirebaseMessagingService {
 

@@ -36,6 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
+import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.controller.Validate;
 import com.crown.onspotbusiness.model.Business;
@@ -47,9 +48,7 @@ import com.crown.onspotbusiness.utils.HttpVolleyRequest;
 import com.crown.onspotbusiness.utils.ImagePicker;
 import com.crown.onspotbusiness.utils.JsonParse;
 import com.crown.onspotbusiness.utils.MessageUtils;
-import com.crown.onspotbusiness.utils.MockData;
 import com.crown.onspotbusiness.utils.WeekDayHelper;
-import com.crown.onspotbusiness.utils.abstracts.ListItem;
 import com.crown.onspotbusiness.utils.abstracts.OnCardImageRemove;
 import com.crown.onspotbusiness.utils.abstracts.OnHttpResponse;
 import com.crown.onspotbusiness.utils.compression.ImageCompression;
@@ -72,6 +71,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -270,8 +270,16 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
     }
 
     private void getBusinessType() {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, MockData.businessType());
-        mBusinessTypeACTV.setAdapter(adapter);
+        FirebaseFirestore.getInstance().collection(getString(R.string.ref_crown_onspot)).document(getString(R.string.doc_business_type)).get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                if (CreateBusinessActivity.this.isFinishing()) return;
+                ArrayList<String> businessTypes = (ArrayList<String>) documentSnapshot.get(getString(R.string.field_business_type));
+                if (businessTypes == null) return;
+                Collections.sort(businessTypes, (String::compareToIgnoreCase));
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(CreateBusinessActivity.this, R.layout.dropdown_menu_popup_item, businessTypes);
+                mBusinessTypeACTV.setAdapter(adapter);
+            }
+        }).addOnFailureListener(e -> Log.v(TAG, "Error: " + e));
     }
 
     @Override
@@ -452,7 +460,7 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
         }
         if (mImageUris == null || mImageUris.size() == 0) {
             String message = "At least add an image";
-            MessageUtils.showActionIndefiniteSnackBar(findViewById(android.R.id.content), message, "ADD IMAGE", 0, (view, requestCode) -> {
+            MessageUtils.showActionShortSnackBar(findViewById(android.R.id.content), message, "ADD IMAGE", 0, (view, requestCode) -> {
                 new ImagePicker(this, ImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
             });
             return;
