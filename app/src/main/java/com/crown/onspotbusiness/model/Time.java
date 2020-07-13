@@ -1,5 +1,8 @@
 package com.crown.onspotbusiness.model;
 
+
+import com.google.firebase.database.annotations.NotNull;
+
 public class Time {
     public static final String AM = "AM";
     public static final String PM = "PM";
@@ -32,7 +35,7 @@ public class Time {
         return zone;
     }
 
-    public boolean isBuggerThan(Time time) {
+    public boolean isBuggerThan(@NotNull Time time) {
         int hour = time.getHour();
         int thisHour = this.getHour();
         if (this.getZone().equals("PM")) thisHour += 12;

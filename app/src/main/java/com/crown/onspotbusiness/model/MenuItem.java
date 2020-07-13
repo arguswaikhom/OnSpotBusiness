@@ -2,9 +2,9 @@ package com.crown.onspotbusiness.model;
 
 import androidx.annotation.NonNull;
 
+import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.onspotbusiness.utils.ListItemKey;
 import com.crown.onspotbusiness.utils.MenuItemHelper;
-import com.crown.onspotbusiness.utils.abstracts.ListItem;
 import com.google.gson.Gson;
 
 import java.util.List;

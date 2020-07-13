@@ -25,7 +25,7 @@
             android:name=".page.MainActivity"
             android:theme="@style/Material.NoActionBar" />
         <activity
-            android:name=".page.CreateOrEditBusinessItemActivity"
+            android:name=".page.CreateItemActivity"
             android:label="Add Item"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
@@ -83,6 +83,14 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher_round" />
+
+        <!--<meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />-->
     </application>
 
 </manifest>

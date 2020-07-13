@@ -12,7 +12,7 @@ import androidx.appcompat.widget.PopupMenu;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.model.Menu;
 import com.crown.onspotbusiness.model.MenuItem;
-import com.crown.onspotbusiness.page.CreateOrEditBusinessItemActivity;
+import com.crown.onspotbusiness.page.CreateItemActivity;
 import com.crown.onspotbusiness.utils.MenuItemHelper;
 import com.crown.onspotbusiness.view.ListItemAdapter;
 import com.crown.onspotbusiness.view.MenuItemOnStockUpdateDialog;
@@ -123,8 +123,8 @@ public class MenuItemCH implements View.OnClickListener, PopupMenu.OnMenuItemCli
 
         switch (id) {
             case R.id.option_mimo_edit:
-                Intent intent = new Intent(activity, CreateOrEditBusinessItemActivity.class);
-                intent.putExtra(CreateOrEditBusinessItemActivity.KEY_MENU_ITEM, new Gson().toJson(this.item));
+                Intent intent = new Intent(activity, CreateItemActivity.class);
+                intent.putExtra(CreateItemActivity.KEY_MENU_ITEM, new Gson().toJson(this.item));
                 activity.startActivity(intent);
                 break;
             case R.id.option_mimo_delete:

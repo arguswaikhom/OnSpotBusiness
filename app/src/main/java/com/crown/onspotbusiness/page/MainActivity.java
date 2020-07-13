@@ -8,6 +8,9 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
+import com.crown.library.onspotlibrary.controller.OSPreferences;
+import com.crown.library.onspotlibrary.model.business.BusinessV6;
+import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.model.Business;
 import com.crown.onspotbusiness.model.User;
@@ -32,9 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mBottomNavigationView = findViewById(R.id.nav_view);
-        // AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(R.id.navigation_home, R.id.navigation_menu, R.id.navigation_notifications).build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        // NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(mBottomNavigationView, navController);
         syncAccountInfo();
     }
@@ -59,6 +60,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.v(TAG, "Business: " + business);
                 if (business != null) {
                     Preferences.getInstance(getApplicationContext()).setObject(business, PreferenceKey.BUSINESS);
+                }
+
+                BusinessV6 osb = documentSnapshot.toObject(BusinessV6.class);
+                Log.d("debug", osb.toString());
+                if (osb != null) {
+                    OSPreferences.getInstance(getApplicationContext()).setObject(osb, OSPreferenceKey.BUSINESS);
                 }
             }
         }));

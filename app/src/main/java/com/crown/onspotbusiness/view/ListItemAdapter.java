@@ -17,6 +17,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.crown.library.onspotlibrary.model.ListItem;
+import com.crown.library.onspotlibrary.model.notification.DeliveryPartnershipRequest;
+import com.crown.library.onspotlibrary.utils.ListItemType;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.controller.ItemHelper;
 import com.crown.onspotbusiness.controller.clickHandler.MenuItemCH;
@@ -32,10 +35,10 @@ import com.crown.onspotbusiness.page.AllOrderActivity;
 import com.crown.onspotbusiness.utils.ListItemKey;
 import com.crown.onspotbusiness.utils.MenuItemHelper;
 import com.crown.onspotbusiness.utils.TimeUtils;
-import com.crown.onspotbusiness.utils.abstracts.ListItem;
 import com.crown.onspotbusiness.utils.abstracts.OnCardImageRemove;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
+import com.crown.onspotbusiness.view.viewholder.DeliveryPartnershipRequestVH;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
 
@@ -57,6 +60,10 @@ public class ListItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView;
         switch (viewType) {
+            case ListItemType.DELIVERY_PARTNERSHIP_REQUEST: {
+                rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.noti_delivery_partnership_request, parent, false);
+                return new DeliveryPartnershipRequestVH(rootView);
+            }
             case ListItemKey.HEADER: {
                 rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.section_header, parent, false);
                 return new ViewHolder.HeaderVH(rootView);
@@ -75,12 +82,15 @@ public class ListItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return new ViewHolder.OrderVH(rootView);
             }
         }
-
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)) {
+            case ListItemType.DELIVERY_PARTNERSHIP_REQUEST: {
+                ((DeliveryPartnershipRequestVH) holder).bind(((DeliveryPartnershipRequest) mDataset.get(position)));
+                break;
+            }
             case ListItemKey.ORDER: {
                 setUpOrder((ViewHolder.OrderVH) holder, (Order) mDataset.get(position), position);
                 break;

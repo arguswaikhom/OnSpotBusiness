@@ -11,10 +11,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.model.Order;
 import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.utils.abstracts.ListItem;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.crown.onspotbusiness.view.ListItemAdapter;

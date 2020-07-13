@@ -18,7 +18,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".page.CreateOrEditBusinessItemActivity">
+        tools:context=".page.CreateItemActivity">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -56,7 +56,7 @@
                         android:id="@+id/tiet_aami_item_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
+                        android:digits=" .,ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
                         android:inputType="textFilter"
                         android:maxLength="30"
                         android:maxLines="1" />
@@ -106,7 +106,7 @@
                     android:layout_marginBottom="@dimen/primary_margin"
                     android:hint="Description"
                     app:counterEnabled="true"
-                    app:counterMaxLength="150"
+                    app:counterMaxLength="300"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textButton">
 
@@ -115,7 +115,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textMultiLine"
-                        android:maxLength="150" />
+                        android:maxLength="300" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView

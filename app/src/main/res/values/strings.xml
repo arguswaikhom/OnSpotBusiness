@@ -15,9 +15,13 @@
     <string name="ref_business">business</string>
     <string name="ref_user">user</string>
     <string name="ref_order">order</string>
+    <string name="ref_crown_onspot">crown-onspot</string>
     <string name="ref_storage_item_image">itemImage</string>
     <string name="ref_storage_business_image">businessImage</string>
 
+    <string name="doc_business_type">business-type</string>
+
     <string name="field_device_token">deviceToken</string>
     <string name="field_image_urls">imageUrls</string>
+    <string name="field_business_type">business-type</string>
 </resources>
