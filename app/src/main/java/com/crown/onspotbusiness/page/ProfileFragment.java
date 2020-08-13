@@ -25,7 +25,6 @@ import com.crown.onspotbusiness.model.User;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.gson.Gson;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -74,9 +73,11 @@ public class ProfileFragment extends Fragment {
 
     @OnClick(R.id.mcv_fp_business)
     void onCLickedMyBusiness() {
-        Intent intent = new Intent(getActivity(), CreateBusinessActivity.class);
+        /*Intent intent = new Intent(getActivity(), CreateBusinessActivity.class);
         intent.putExtra(CreateBusinessActivity.KEY_BUSINESS, new Gson().toJson(business));
-        startActivity(intent);
+        startActivity(intent);*/
+
+        startActivity(new Intent(getActivity(), ModifyBusinessActivity.class));
     }
 
     @OnClick(R.id.ll_fp_logout)

@@ -24,4 +24,7 @@
     <string name="field_device_token">deviceToken</string>
     <string name="field_image_urls">imageUrls</string>
     <string name="field_business_type">business-type</string>
+
+    <!--Button text-->
+    <string name="action_set_item_unit">Set unit</string>
 </resources>

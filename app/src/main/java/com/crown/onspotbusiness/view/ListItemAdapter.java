@@ -14,30 +14,31 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.bumptech.glide.request.RequestOptions;
 import com.crown.library.onspotlibrary.model.ListItem;
+import com.crown.library.onspotlibrary.model.OSOrder;
+import com.crown.library.onspotlibrary.model.UnSupportedContent;
+import com.crown.library.onspotlibrary.model.businessItem.BusinessItemOSB;
 import com.crown.library.onspotlibrary.model.notification.DeliveryPartnershipRequest;
 import com.crown.library.onspotlibrary.utils.ListItemType;
+import com.crown.library.onspotlibrary.views.viewholder.UnSupportedContentVH;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.controller.ItemHelper;
-import com.crown.onspotbusiness.controller.clickHandler.MenuItemCH;
 import com.crown.onspotbusiness.controller.clickHandler.OrderCH;
 import com.crown.onspotbusiness.model.Business;
 import com.crown.onspotbusiness.model.Header;
-import com.crown.onspotbusiness.model.MenuItem;
 import com.crown.onspotbusiness.model.MenuItemImage;
 import com.crown.onspotbusiness.model.Order;
 import com.crown.onspotbusiness.model.OrderItem;
 import com.crown.onspotbusiness.model.StatusRecord;
 import com.crown.onspotbusiness.page.AllOrderActivity;
 import com.crown.onspotbusiness.utils.ListItemKey;
-import com.crown.onspotbusiness.utils.MenuItemHelper;
 import com.crown.onspotbusiness.utils.TimeUtils;
 import com.crown.onspotbusiness.utils.abstracts.OnCardImageRemove;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
+import com.crown.onspotbusiness.view.viewholder.BusinessItemCardVH;
+import com.crown.onspotbusiness.view.viewholder.BusinessItemDetailsVH;
+import com.crown.onspotbusiness.view.viewholder.CurrentOrderVH;
 import com.crown.onspotbusiness.view.viewholder.DeliveryPartnershipRequestVH;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.GeoPoint;
@@ -60,6 +61,18 @@ public class ListItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View rootView;
         switch (viewType) {
+            case ListItemType.BUSINESS_ITEM_CARD: {
+                rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.li_business_item_card, parent, false);
+                return new BusinessItemCardVH(rootView);
+            }
+            case ListItemType.UNSUPPORTED_CONTENT: {
+                rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.li_unsupported_content, parent, false);
+                return new UnSupportedContentVH(rootView);
+            }
+            case ListItemType.OS_ORDER: {
+                rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.li_current_order, parent, false);
+                return new CurrentOrderVH(rootView);
+            }
             case ListItemType.DELIVERY_PARTNERSHIP_REQUEST: {
                 rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.noti_delivery_partnership_request, parent, false);
                 return new DeliveryPartnershipRequestVH(rootView);
@@ -68,9 +81,9 @@ public class ListItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.section_header, parent, false);
                 return new ViewHolder.HeaderVH(rootView);
             }
-            case ListItemKey.MENU_ITEM: {
-                rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_menu_item, parent, false);
-                return new ViewHolder.MenuItemVH(rootView);
+            case ListItemType.BUSINESS_ITEM_OSB: {
+                rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.li_business_item_details, parent, false);
+                return new BusinessItemDetailsVH(rootView);
             }
             case ListItemKey.MENU_ITEM_IMAGE: {
                 rootView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_image_view_holder_card, parent, false);
@@ -87,6 +100,22 @@ public class ListItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         switch (getItemViewType(position)) {
+            case ListItemType.UNSUPPORTED_CONTENT: {
+                ((UnSupportedContentVH) holder).bind((UnSupportedContent) mDataset.get(position));
+                break;
+            }
+            case ListItemType.BUSINESS_ITEM_OSB: {
+                ((BusinessItemDetailsVH) holder).bind((BusinessItemOSB) mDataset.get(position));
+                break;
+            }
+            case ListItemType.BUSINESS_ITEM_CARD: {
+                ((BusinessItemCardVH) holder).bind((BusinessItemOSB) mDataset.get(position));
+                break;
+            }
+            case ListItemType.OS_ORDER: {
+                ((CurrentOrderVH) holder).bind(((OSOrder) mDataset.get(position)));
+                break;
+            }
             case ListItemType.DELIVERY_PARTNERSHIP_REQUEST: {
                 ((DeliveryPartnershipRequestVH) holder).bind(((DeliveryPartnershipRequest) mDataset.get(position)));
                 break;
@@ -103,46 +132,12 @@ public class ListItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 setUpMenuItemImage((MenuItemImage) mDataset.get(position), (ViewHolder.CardImageVH) holder);
                 break;
             }
-            case ListItemKey.MENU_ITEM: {
-                setUpMenuItem((ViewHolder.MenuItemVH) holder, (MenuItem) mDataset.get(position));
-                break;
-            }
         }
     }
 
     private void setUpMenuItemImage(MenuItemImage menuItemImage, ViewHolder.CardImageVH holder) {
         Glide.with(this.mContext).load(menuItemImage.getImage()).into(holder.cardImageIV);
         holder.removeFab.setOnClickListener(view -> ((OnCardImageRemove) mContext).onCardImageRemove(menuItemImage));
-    }
-
-    private void setUpMenuItem(ViewHolder.MenuItemVH holder, MenuItem item) {
-        MenuItemCH clickHandler = new MenuItemCH(this, (Activity) mContext, item);
-
-        holder.titleTV.setText(item.getItemName());
-        holder.onStockTV.setText(String.format(Locale.ENGLISH, "Item on stock: %s", item.getOnStock() == null ? "∞" : item.getOnStock().toString()));
-        holder.priceTL.removeAllViews();
-        holder.priceTL.addView(getPriceView("Price: ", "₹ " + item.getPrice()));
-        holder.priceTL.addView(getPriceView("Tax: ", "+ ₹ " + item.getTax()));
-        holder.priceTL.addView(getPriceView("Discount: ", "- ₹ " + item.getDiscount()));
-        holder.priceTL.addView(getPriceView("Final price: ", "₹ " + item.getFinalPrice()));
-
-        if (item.getStatus() != null) {
-            holder.statusDropDownBtn.setText(MenuItemHelper.getTitle(item.getStatus()));
-        }
-
-        holder.moreOverflowIBtn.setOnClickListener(clickHandler);
-        holder.updateOnStockBtn.setOnClickListener(clickHandler);
-        holder.statusDropDownBtn.setOnClickListener(clickHandler);
-
-        Glide.with(this.mContext).load(item.getImageUrl()).apply(new RequestOptions().transform(new CenterCrop(), new RoundedCorners(16))).into(holder.itemImageIV);
-
-    }
-
-    private View getPriceView(String label, String value) {
-        LinearLayout root = (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.item_price, null);
-        ((TextView) root.findViewById(R.id.tv_ip_label)).setText(label);
-        ((TextView) root.findViewById(R.id.tv_ip_price)).setText(value);
-        return root;
     }
 
     private void setUpHeader(ViewHolder.HeaderVH holder, Header header, int position) {

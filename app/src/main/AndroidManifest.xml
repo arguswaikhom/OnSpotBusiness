@@ -22,12 +22,11 @@
         android:supportsRtl="true"
         android:theme="@style/Material">
         <activity
+            android:name=".page.ShippingChargeActivity"
+            android:theme="@style/DialogActivity.NoActionBar" />
+        <activity
             android:name=".page.MainActivity"
             android:theme="@style/Material.NoActionBar" />
-        <activity
-            android:name=".page.CreateItemActivity"
-            android:label="Add Item"
-            android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
             android:name=".page.AllOrderActivity"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
@@ -36,13 +35,28 @@
             android:label="Create Business"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
+            android:name=".page.ModifyBusinessActivity"
+            android:label="Create Business"
+            android:theme="@style/Material.NoActionBar.GreyStatusBar" />
+        <activity
             android:name=".page.PhoneVerificationActivity"
             android:theme="@style/Material.NoActionBar" />
         <activity
             android:name=".page.SignInActivity"
             android:theme="@style/Material.NoActionBar">
+            <!--<intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
+        </activity>
+
+        <activity
+            android:name=".page.SignInPage"
+            android:theme="@style/Material.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -63,6 +77,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".page.MainActivity" />
         </activity>
+        <activity
+            android:name=".page.ModifyBusinessItemActivity"
+            android:label="Add Item"
+            android:theme="@style/Material.NoActionBar.GreyStatusBar" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -73,9 +91,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/key_api" />
+
         <service
             android:name=".controller.FirebaseMessagingService"
             android:exported="false">
@@ -87,10 +107,6 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher_round" />
-
-        <!--<meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorAccent" />-->
     </application>
 
 </manifest>

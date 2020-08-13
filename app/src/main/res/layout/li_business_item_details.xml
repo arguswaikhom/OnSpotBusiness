@@ -27,7 +27,7 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/iv_mi_image"
+                android:id="@+id/image_iv"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_gravity="center"
@@ -39,12 +39,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/activity_vertical_margin"
-                android:layout_toStartOf="@+id/ibtn_mi_more_overflow"
-                android:layout_toEndOf="@+id/iv_mi_image"
+                android:layout_toStartOf="@+id/more_ibtn"
+                android:layout_toEndOf="@+id/image_iv"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tv_mi_title"
+                    android:id="@+id/name_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
@@ -56,24 +56,24 @@
                     tools:text="Cereal and Muesli" />
 
                 <LinearLayout
-                    android:id="@+id/ll_mi_ratings"
+                    android:id="@+id/ratings_ll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:orientation="horizontal"
-                    android:visibility="gone"
+                    android:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent">
 
                     <RatingBar
-                        android:id="@+id/rb_mi_rating_bar"
+                        android:id="@+id/rating_bar"
                         style="?android:attr/ratingBarStyleSmall"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:rating="3.5" />
 
                     <TextView
-                        android:id="@+id/tv_mi_rating_vote_count"
+                        android:id="@+id/rating_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/primary_margin"
@@ -84,7 +84,7 @@
             </LinearLayout>
 
             <ImageButton
-                android:id="@+id/ibtn_mi_more_overflow"
+                android:id="@+id/more_ibtn"
                 style="?android:attr/actionOverflowButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -101,7 +101,7 @@
             android:visibility="gone">
 
             <TextView
-                android:id="@+id/tv_mi_available_on_stock"
+                android:id="@+id/stock_count_tv"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -110,7 +110,7 @@
                 tools:text="Item on stock: 10" />
 
             <Button
-                android:id="@+id/btn_mi_update_on_stock"
+                android:id="@+id/stock_update_btn"
                 style="?attr/materialButtonOutlinedStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -119,19 +119,22 @@
         </LinearLayout>
 
         <TableLayout
-            android:id="@+id/tl_mi_price"
+            android:id="@+id/price_tl"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/primary_margin" />
 
         <Button
-            android:id="@+id/btn_mi_status_dropdown"
+            android:id="@+id/status_btn"
             style="@style/Widget.MaterialComponents.Button.Icon"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Available"
-            app:icon="@drawable/ic_arrow_drop_down_black_24dp" />
+            android:textAllCaps="false"
+            android:textColor="@android:color/black"
+            app:icon="@drawable/ic_arrow_drop_down_black_24dp"
+            app:iconTint="@android:color/black"
+            tools:ignore="MissingPrefix"
+            tools:text="Available" />
 
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

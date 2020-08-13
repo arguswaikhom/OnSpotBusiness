@@ -8,19 +8,23 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.crown.library.onspotlibrary.controller.OSPreferences;
 import com.crown.library.onspotlibrary.model.ListItem;
+import com.crown.library.onspotlibrary.model.UnSupportedContent;
+import com.crown.library.onspotlibrary.model.businessItem.BusinessItemCard;
+import com.crown.library.onspotlibrary.model.businessItem.BusinessItemOSB;
+import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
-import com.crown.onspotbusiness.model.MenuItem;
+import com.crown.onspotbusiness.databinding.FragmentMenuBinding;
+import com.crown.onspotbusiness.model.OSBPreferences;
 import com.crown.onspotbusiness.model.User;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
@@ -33,7 +37,6 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class BusinessItemFragment extends Fragment implements EventListener<QuerySnapshot> {
@@ -42,7 +45,9 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
 
     private ListItemAdapter mAdapter;
     private List<ListItem> mDataset;
-    private TextView mNoCurrentOrderMessage;
+    private OSBPreferences preferences;
+    private FragmentMenuBinding binding;
+    private List<DocumentSnapshot> archivedDocs;
     private ListenerRegistration mMenuItemChangeListener;
 
     @Override
@@ -54,30 +59,36 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_menu, container, false);
+        binding = FragmentMenuBinding.inflate(inflater, container, false);
 
-        mNoCurrentOrderMessage = root.findViewById(R.id.tv_wtl_warning);
-        mNoCurrentOrderMessage.setText("Create item to see here");
-
-        Toolbar toolbar = root.findViewById(R.id.tbar_aao_tool_bar);
-        toolbar.setTitle("Item");
+        binding.warningInclude.tvWtlWarning.setText("Create item to see here");
+        binding.toolbar.setTitle("Item");
         setHasOptionsMenu(true);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        RecyclerView mRecyclerView = root.findViewById(R.id.rv_bnrvl_recycler_view);
-        mRecyclerView.setHasFixedSize(true);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
+        archivedDocs = new ArrayList<>();
+        preferences = OSPreferences.getInstance(getContext()).getObject(OSPreferenceKey.SHARED_PREFERENCES, OSBPreferences.class);
 
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        binding.listRv.setHasFixedSize(true);
+        setUpRecycler();
+
+        return binding.getRoot();
+    }
+
+    private void setUpRecycler() {
+        if (preferences != null && preferences.getBussItemView() == OSBPreferences.GRID) {
+            binding.listRv.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        } else {
+            binding.listRv.setLayoutManager(new LinearLayoutManager(getContext()));
+        }
 
         mAdapter = new ListItemAdapter(getContext(), mDataset);
-        mRecyclerView.setAdapter(mAdapter);
-
-        return root;
+        binding.listRv.setAdapter(mAdapter);
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        // todo: get archived == false
         String businessREfId = Preferences.getInstance(getActivity().getApplicationContext()).getObject(PreferenceKey.USER, User.class).getBusinessRefId();
         mMenuItemChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_item)).whereEqualTo("businessRefId", businessREfId).addSnapshotListener(this);
     }
@@ -90,9 +101,24 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
 
     @Override
     public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
-        if (item.getItemId() == R.id.nav_mio_add_item) {
-            Intent intent = new Intent(getContext(), CreateItemActivity.class);
-            startActivity(intent);
+        switch (item.getItemId()) {
+            case R.id.nav_mio_add_item:
+                Intent intent = new Intent(getContext(), ModifyBusinessItemActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.action_mio_swap:
+                if (preferences == null) {
+                    preferences = new OSBPreferences();
+                    preferences.setBussItemView(OSBPreferences.GRID);
+                } else if (preferences.getBussItemView() == OSBPreferences.DETAILS) {
+                    preferences.setBussItemView(OSBPreferences.GRID);
+                } else {
+                    preferences.setBussItemView(OSBPreferences.DETAILS);
+                }
+                OSPreferences.getInstance(getContext()).setObject(preferences, OSPreferenceKey.SHARED_PREFERENCES);
+                setUpRecycler();
+                updateItemList(archivedDocs);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -108,27 +134,40 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
         Log.v(TAG, "Item changed");
         if (snapshots != null && !snapshots.isEmpty()) {
             updateItemList(snapshots.getDocuments());
+            archivedDocs = snapshots.getDocuments();
         } else {
-            mNoCurrentOrderMessage.setVisibility(View.VISIBLE);
+            binding.warningInclude.tvWtlWarning.setVisibility(View.VISIBLE);
         }
     }
 
     private void updateItemList(List<DocumentSnapshot> documents) {
+        boolean hasUnSupportedItem = false;
+        UnSupportedContent unSupportedContent = new UnSupportedContent();
         mDataset.clear();
         for (DocumentSnapshot doc : documents) {
             if (doc.exists()) {
-                MenuItem item = doc.toObject(MenuItem.class);
-                assert item != null;
-                item.setDeleted((Boolean) doc.get("isDeleted"));
-                item.setItemId(doc.getId());
-                if (!item.getDeleted()) {
-                    mDataset.add(item);
+                try {
+                    if (preferences != null && preferences.getBussItemView() == OSBPreferences.GRID) {
+                        BusinessItemCard item = doc.toObject(BusinessItemCard.class);
+                        item.setItemId(doc.getId());
+                        mDataset.add(item);
+                    } else {
+                        BusinessItemOSB item = doc.toObject(BusinessItemOSB.class);
+                        item.setItemId(doc.getId());
+                        mDataset.add(doc.toObject(BusinessItemOSB.class));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    hasUnSupportedItem = true;
+                    unSupportedContent.addItem(doc);
                 }
             }
         }
-        Collections.sort(mDataset, (o1, o2) -> ((MenuItem) o1).getItemName().compareTo(((MenuItem) o2).getItemName()));
-        if (mDataset.size() <= 0) mNoCurrentOrderMessage.setVisibility(View.VISIBLE);
-        else mNoCurrentOrderMessage.setVisibility(View.GONE);
+        if (hasUnSupportedItem) mDataset.add(unSupportedContent);
+
+        // Collections.sort(mDataset, (o1, o2) -> ((MenuItem) o1).getItemName().compareTo(((MenuItem) o2).getItemName()));
+        if (mDataset.size() <= 0) binding.warningInclude.tvWtlWarning.setVisibility(View.VISIBLE);
+        else binding.warningInclude.tvWtlWarning.setVisibility(View.GONE);
         mAdapter.notifyDataSetChanged();
     }
 }

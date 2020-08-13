@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_mbic_modify"
+        android:title="Edit details" />
+
+    <item
+        android:id="@+id/action_mbic_available"
+        android:title="Available" />
+
+    <item
+        android:id="@+id/action_mbic_not_available"
+        android:title="Not available" />
+
+    <item
+        android:id="@+id/action_mbic_out_of_stock"
+        android:title="Out of stock" />
+
+    <item
+        android:id="@+id/action_mbic_archive"
+        android:title="Archive" />
+</menu>
