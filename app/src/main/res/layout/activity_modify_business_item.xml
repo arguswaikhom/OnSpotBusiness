@@ -9,7 +9,7 @@
     android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/tbar_fm_tool_bar"
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
@@ -18,7 +18,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".page.CreateItemActivity">
+        tools:context=".page.ModifyBusinessItemActivity">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -31,7 +31,7 @@
                 android:orientation="vertical">
 
                 <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_aami_card_image"
+                    android:id="@+id/image_rv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -40,7 +40,7 @@
                     tools:listitem="@layout/list_item_image_view_holder_card" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_aami_item_name"
+                    android:id="@+id/name_til"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -50,10 +50,10 @@
                     app:counterEnabled="true"
                     app:counterMaxLength="30"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textButton">
+                    app:layout_constraintTop_toBottomOf="@+id/contact_us_btn">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/tiet_aami_item_name"
+                        android:id="@+id/name_tiet"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:digits=" .,ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
@@ -63,7 +63,7 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_aami_categories"
+                    android:id="@+id/categories_til"
                     style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -73,32 +73,50 @@
                     app:counterMaxLength="30">
 
                     <AutoCompleteTextView
-                        android:id="@+id/actv_aami_categories"
+                        android:id="@+id/categories_actv"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
-
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_aami_price"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/primary_margin"
-                    android:layout_marginBottom="@dimen/primary_margin"
-                    android:hint="Price"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textButton">
+                    android:orientation="horizontal">
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/tiet_aami_price"
-                        android:layout_width="match_parent"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/quantity_til"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:layout_marginTop="@dimen/primary_margin"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginBottom="@dimen/primary_margin"
+                        android:layout_weight="1"
+                        android:hint="Quantity"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/contact_us_btn">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/quantity_tiet"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <Button
+                        android:id="@+id/unit_btn"
+                        style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_weight="1"
+                        android:text="@string/action_set_item_unit"
+                        android:textAllCaps="false"
+                        app:icon="@drawable/ic_arrow_drop_down_black_24dp" />
+                </LinearLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_aami_description"
+                    android:id="@+id/description_til"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -108,21 +126,65 @@
                     app:counterEnabled="true"
                     app:counterMaxLength="300"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textButton">
+                    app:layout_constraintTop_toBottomOf="@+id/contact_us_btn">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/tiet_aami_description"
+                        android:id="@+id/description_tiet"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="textMultiLine"
                         android:maxLength="300" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/primary_margin"
+                    android:layout_marginBottom="@dimen/primary_margin"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/price_til"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:hint="Price (₹)"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/contact_us_btn">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/price_tiet"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/tax_til"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:hint="Taxes (%)"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/contact_us_btn">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/tax_tiet"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/primary_margin"
-                    android:text="Choose a type of discount and value"
+                    android:text="Choose a type of discount and it's value"
                     android:textSize="@dimen/sp_sub1" />
 
                 <LinearLayout
@@ -133,52 +195,35 @@
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/btn_aami_discount_type"
-                        style="@style/Widget.MaterialComponents.Button.Icon"
+                        android:id="@+id/discount_type_btn"
+                        style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/primary_margin"
+                        android:layout_gravity="center"
                         android:layout_weight="1"
-                        android:text="No discount"
-                        app:icon="@drawable/ic_arrow_drop_down_black_24dp" />
+                        android:textAllCaps="false"
+                        app:icon="@drawable/ic_arrow_drop_down_black_24dp"
+                        tools:text="No discount" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_aami_discount_value"
+                        android:id="@+id/discount_value_til"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="@dimen/primary_margin"
                         android:layout_weight="1"
-                        android:hint="Value"
+                        android:hint="Discount value"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textButton">
+                        app:layout_constraintTop_toBottomOf="@+id/contact_us_btn">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/tiet_aami_discount_value"
+                            android:id="@+id/discount_value_tiet"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:enabled="false"
                             android:inputType="number" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/til_aami_tax"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/primary_margin"
-                    android:layout_marginBottom="@dimen/primary_margin"
-                    android:hint="Taxes"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textButton">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/tiet_aami_tax"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number" />
-                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -195,7 +240,7 @@
                     android:orientation="horizontal">
 
                     <Button
-                        android:id="@+id/btn_aami_cancel"
+                        android:id="@+id/cancel_btn"
                         style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -203,7 +248,7 @@
                         android:text="Cancel" />
 
                     <Button
-                        android:id="@+id/btn_aami_submit"
+                        android:id="@+id/submit_btn"
                         style="@style/Widget.MaterialComponents.Button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -213,7 +258,7 @@
             </LinearLayout>
 
             <ProgressBar
-                android:id="@+id/pbar_aami_loading"
+                android:id="@+id/loading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

@@ -28,22 +28,8 @@ android {
         targetCompatibility = 1.8
     }
 
-    viewBinding {
-        enabled = true
-    }
-
-    sourceSets {
-        main {
-            res.srcDirs =
-                    [
-                            'src/main/res',
-                            'src/main/res/layouts',
-                            'src/main/res/layouts/item',
-                            'src/main/res/layouts/dialog',
-                            'src/main/res/layouts/listItem',
-                            'src/main/res/layouts/page'
-                    ]
-        }
+    buildFeatures {
+        viewBinding true
     }
 }
 

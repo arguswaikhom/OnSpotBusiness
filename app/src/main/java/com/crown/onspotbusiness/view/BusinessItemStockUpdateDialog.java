@@ -12,8 +12,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.crown.library.onspotlibrary.model.businessItem.BusinessItemOSB;
 import com.crown.onspotbusiness.R;
-import com.crown.onspotbusiness.model.MenuItem;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -22,9 +22,9 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MenuItemOnStockUpdateDialog extends DialogFragment {
+public class BusinessItemStockUpdateDialog extends DialogFragment {
     public static final String KEY_MENU_ITEM = "MENU_ITEM";
-    private MenuItem item;
+    private BusinessItemOSB item;
 
     @NonNull
     @Override
@@ -37,13 +37,13 @@ public class MenuItemOnStockUpdateDialog extends DialogFragment {
         TextInputEditText onStockTIET = root.findViewById(R.id.tiet_miu_stock);
         root.findViewById(R.id.btn_miu_undefine).setOnClickListener(view -> {
             if (item.getOnStock() != null) updateOnStock(null);
-            MenuItemOnStockUpdateDialog.this.getDialog().cancel();
+            BusinessItemStockUpdateDialog.this.getDialog().cancel();
         });
 
         Bundle argument = getArguments();
         if (argument != null) {
             String json = argument.getString(KEY_MENU_ITEM);
-            item = new Gson().fromJson(json, MenuItem.class);
+            item = new Gson().fromJson(json, BusinessItemOSB.class);
             if (item.getOnStock() != null) onStockTIET.setText(String.valueOf(item.getOnStock()));
         }
 
@@ -57,7 +57,7 @@ public class MenuItemOnStockUpdateDialog extends DialogFragment {
 
                     updateOnStock(Long.valueOf(updatedStock));
                 })
-                .setNegativeButton(R.string.action_cancel, (dialog, id) -> MenuItemOnStockUpdateDialog.this.getDialog().cancel());
+                .setNegativeButton(R.string.action_cancel, (dialog, id) -> BusinessItemStockUpdateDialog.this.getDialog().cancel());
         return builder.create();
     }
 

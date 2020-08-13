@@ -5,16 +5,10 @@
     android:startX="281.316"
     android:startY="797.456"
     android:type="linear">
-    <!--<item
-        android:color="@color/colorPrimaryDark"
+    <item
+        android:color="@color/bg"
         android:offset="0" />
     <item
-        android:color="@color/colorPrimaryDark"
-        android:offset="1" />-->
-    <item
-        android:color="#ff8e2de2"
-        android:offset="0" />
-    <item
-        android:color="#ff4a00e0"
+        android:color="@color/bgDark"
         android:offset="1" />
 </gradient>

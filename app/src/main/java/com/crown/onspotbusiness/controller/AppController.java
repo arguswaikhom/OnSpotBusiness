@@ -10,10 +10,12 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.crown.library.onspotlibrary.controller.OSPreferences;
+import com.crown.library.onspotlibrary.model.user.UserOSB;
+import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.model.Business;
-import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.page.SignInActivity;
+import com.crown.onspotbusiness.page.SignInPage;
 import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -98,7 +100,7 @@ public class AppController extends Application {
     public boolean isAuthenticated() {
         boolean hasAuthenticated = false;
         FirebaseAuth auth = getFirebaseAuth();
-        User user = Preferences.getInstance(getApplicationContext()).getObject(PreferenceKey.USER, User.class);
+        UserOSB user = OSPreferences.getInstance(getApplicationContext()).getObject(OSPreferenceKey.USER, UserOSB.class);
         if (auth != null && auth.getUid() != null && !auth.getUid().isEmpty() && auth.getCurrentUser() != null && user != null) {
             hasAuthenticated = true;
         }
@@ -131,7 +133,7 @@ public class AppController extends Application {
             e.printStackTrace();
         }
 
-        Intent intent = new Intent(activity, SignInActivity.class);
+        Intent intent = new Intent(activity, SignInPage.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activity.startActivity(intent);
         activity.finish();

@@ -10,6 +10,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.crown.library.onspotlibrary.controller.OSPreferences;
 import com.crown.library.onspotlibrary.model.business.BusinessV6;
+import com.crown.library.onspotlibrary.model.user.UserOSB;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.model.Business;
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void syncAccountInfo() {
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        User user = Preferences.getInstance(getApplicationContext()).getObject(PreferenceKey.USER, User.class);
+        UserOSB user = OSPreferences.getInstance(getApplicationContext()).getObject(OSPreferenceKey.USER, UserOSB.class);
         mUserChangeListener = firestore.collection(getString(R.string.ref_user)).document(user.getUserId()).addSnapshotListener((documentSnapshot, e) -> {
             if (documentSnapshot != null && documentSnapshot.exists()) {
                 User updatedUser = documentSnapshot.toObject(User.class);
@@ -86,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendDeviceToken(String token) {
-        Preferences preferences = Preferences.getInstance(getApplicationContext());
-        User user = preferences.getObject(PreferenceKey.USER, User.class);
+        OSPreferences preferences = OSPreferences.getInstance(getApplicationContext());
+        UserOSB user = preferences.getObject(OSPreferenceKey.USER, UserOSB.class);
 
         String field = getString(R.string.field_device_token);
         FirebaseFirestore.getInstance().collection(getString(R.string.ref_business))
@@ -95,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 .update(field, FieldValue.arrayUnion(token))
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        preferences.setObject(token, PreferenceKey.DEVICE_TOKEN);
+                        preferences.setObject(token, OSPreferenceKey.DEVICE_TOKEN_OSB);
                     }
                 });
     }
