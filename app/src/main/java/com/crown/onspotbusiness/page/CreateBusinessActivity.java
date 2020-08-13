@@ -19,10 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.ImageView;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,15 +27,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.crown.library.onspotlibrary.model.ListItem;
+import com.crown.library.onspotlibrary.model.OSDeliveryCharge;
+import com.crown.library.onspotlibrary.model.business.BusinessV4;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.controller.Validate;
+import com.crown.onspotbusiness.controller.ViewAnimation;
+import com.crown.onspotbusiness.databinding.ActivityCreateShopBinding;
+import com.crown.onspotbusiness.databinding.IvEditBusinessContactBinding;
+import com.crown.onspotbusiness.databinding.IvEditBusinessInfoBinding;
+import com.crown.onspotbusiness.databinding.IvEditBusinessMoreBinding;
 import com.crown.onspotbusiness.model.Business;
 import com.crown.onspotbusiness.model.Location;
 import com.crown.onspotbusiness.model.MenuItemImage;
@@ -56,14 +59,13 @@ import com.crown.onspotbusiness.utils.preference.PreferenceKey;
 import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.crown.onspotbusiness.view.CreateLocationDialog;
 import com.crown.onspotbusiness.view.ListItemAdapter;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONObject;
 
@@ -79,10 +81,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
 
 public class CreateBusinessActivity extends AppCompatActivity implements TextWatcher, OnHttpResponse, CreateLocationDialog.OnLocationDialogActionClicked, OnCardImageRemove {
 
@@ -94,59 +92,7 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
     private final int RC_INTENT_VERIFY_MOBILE_NUMBER = 2;
     private final int RC_NETWORK_CREATE_BUSINESS = 10;
     private final int RC_NETWORK_EDIT_BUSINESS = 100;
-    /**
-     * Business info section views
-     */
-    @BindView(R.id.til_acs_display_name)
-    TextInputLayout mDisplayNameTIL;
-    @BindView(R.id.til_acs_business_id)
-    TextInputLayout mBusinessIdTIL;
-    @BindView(R.id.til_acs_business_type)
-    TextInputLayout mBusinessTypeTIL;
-    @BindView(R.id.tiet_acs_display_name)
-    TextInputEditText mDisplayNameTIET;
-    @BindView(R.id.tiet_acs_business_id)
-    TextInputEditText mBusinessIdTIET;
-    @BindView(R.id.actv_acs_business_type)
-    AutoCompleteTextView mBusinessTypeACTV;
-
-    /**
-     * Contact section views
-     */
-    @BindView(R.id.til_acs_mobile_no)
-    TextInputLayout mMobileNumberTIL;
-    @BindView(R.id.til_acs_email)
-    TextInputLayout mEmailTIL;
-    @BindView(R.id.til_acs_website)
-    TextInputLayout mWebsiteTIL;
-    @BindView(R.id.tiet_acs_email)
-    TextInputEditText mEmailTIET;
-    @BindView(R.id.tiet_acs_mobile_no)
-    TextInputEditText mMobileNumberTIET;
-
-    /**
-     * More details section views
-     */
-    @BindView(R.id.tv_acs_opening)
-    TextView mOpeningTimeTV;
-    @BindView(R.id.tv_acs_closing)
-    TextView mClosingTimeTV;
-    @BindView(R.id.til_acs_delivery_range)
-    TextInputLayout mDeliveryRangeTIL;
-    @BindView(R.id.tiet_acs_delivery_range)
-    TextInputEditText mDeliveryRangeTIET;
-    @BindView(R.id.cb_acs_enable_passive_open)
-    CheckBox mPassiveOpenCB;
-    @BindView(R.id.iv_acs_passive_open_info)
-    ImageView mPassiveOpenInfoIV;
-
-    /**
-     * Location section views
-     */
-    @BindView(R.id.btn_acs_select_location)
-    Button mAddOrChangeLocationBtn;
-    @BindView(R.id.tv_acs_selected_location)
-    TextView mSelectedLocationTV;
+    private final int RC_SHIPPING_CHARGE = 101;
 
     private ListItemAdapter mAdapter;
     private List<ListItem> mImageUris;
@@ -162,15 +108,36 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
     private AlertDialog mLoadingDialog;
     private String mOldBusinessId;
 
+    private IvEditBusinessInfoBinding infoV;
+    private IvEditBusinessContactBinding contactV;
+    private IvEditBusinessMoreBinding moreV;
+    private ActivityCreateShopBinding binding;
+
+    private int mMaxRange;
+    private BusinessV4 businessV4 = new BusinessV4();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_shop);
-        ButterKnife.bind(this);
+        binding = ActivityCreateShopBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        Toolbar toolbar = findViewById(R.id.tbar_fm_tool_bar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setSupportActionBar(binding.tbarAsc);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        infoV = binding.includeAcsInfo;
+        contactV = binding.includeAcsContact;
+        moreV = binding.includeAcsMore;
+
+        moreV.openingTimeBtn.setOnClickListener(this::onClickedSelectOpeningTime);
+        moreV.closingTimeBtn.setOnClickListener(this::onClickedSelectClosingTime);
+        moreV.selectDaysBtn.setOnClickListener(this::onClickedSelectDays);
+        moreV.hod.setOnCheckedChangeListener(this::onCheckedHod);
+        moreV.hodInfo.setOnClickListener(this::onClickedHodInfo);
+        moreV.freeShipping.setOnCheckedChangeListener(this::onCheckFreeShipping);
+        moreV.shippingCharge.setOnClickListener(this::onClickedShippingCharge);
+        moreV.passiveOpenInfo.setOnClickListener(this::onClickedPassiveOpenInfo);
+        binding.selectLocationBtn.setOnClickListener(this::showPlacePicker);
+        binding.submitBtn.setOnClickListener(this::onClickedSubmit);
 
         initiateUI();
         getBusinessType();
@@ -192,12 +159,216 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
         }
     }
 
-    private void initiateUI() {
-        mMobileNumberTIET.addTextChangedListener(this);
-        mDisplayNameTIET.addTextChangedListener(this);
-        mBusinessIdTIET.addTextChangedListener(this);
+    // start: OnClicks
+    void onClickedSelectOpeningTime(View view) {
+        Calendar calendar = Calendar.getInstance();
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
+            mOpeningTime = new Time(selectedHour, selectedMinute, selectedHour > 12 ? Time.PM : Time.AM);
+            moreV.openingTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", mOpeningTime.getHour(), mOpeningTime.getMinute(), mOpeningTime.getZone()));
+        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
 
-        RecyclerView mRecyclerView = findViewById(R.id.rv_aami_card_image);
+
+        TextView titleTV = new TextView(this);
+        titleTV.setGravity(Gravity.CENTER);
+        titleTV.setTextColor(Color.WHITE);
+        titleTV.setBackgroundColor(getColor(R.color.colorAccent));
+        titleTV.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20f);
+        titleTV.setPadding(20, 20, 20, 20);
+        titleTV.setText(Html.fromHtml("<b>Select opening time</b>"));
+
+        timePickerDialog.setCustomTitle(titleTV);
+        timePickerDialog.show();
+    }
+
+    void onClickedSelectClosingTime(View view) {
+        Calendar calendar = Calendar.getInstance();
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
+            mClosingTime = new Time(selectedHour, selectedMinute, selectedHour > 12 ? Time.PM : Time.AM);
+            moreV.closingTimeTv.setText(String.format(Locale.ENGLISH, "%d:%d %s", mClosingTime.getHour(), mClosingTime.getMinute(), mClosingTime.getZone()));
+        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
+
+
+        TextView titleTV = new TextView(this);
+        titleTV.setGravity(Gravity.CENTER);
+        titleTV.setTextColor(Color.WHITE);
+        titleTV.setBackgroundColor(getColor(R.color.colorAccent));
+        titleTV.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20f);
+        titleTV.setPadding(20, 20, 20, 20);
+        titleTV.setText(Html.fromHtml("<b>Select closing time</b>"));
+
+        timePickerDialog.setCustomTitle(titleTV);
+        timePickerDialog.show();
+    }
+
+    void onClickedSelectDays(View view) {
+        String title = "Choose opening days";
+        String[] weekDays = new WeekDayHelper().getWeekDays();
+        HashSet<String> newSet = (HashSet<String>) mSelectedOpeningDays.clone();
+
+        boolean[] checkedItem = new boolean[weekDays.length];
+        for (int i = 0; i < weekDays.length; i++)
+            if (mSelectedOpeningDays.contains(weekDays[i])) checkedItem[i] = true;
+
+        new AlertDialog.Builder(this).setTitle(title).setMultiChoiceItems(weekDays, checkedItem, (dialog, which, isChecked) -> {
+            if (isChecked) newSet.add(weekDays[which]);
+            else newSet.remove(weekDays[which]);
+        }).setPositiveButton("OK", (dialog, which) -> {
+            // TODO: display selected days
+            mSelectedOpeningDays = newSet;
+        }).setNegativeButton("Cancel", null).create().show();
+    }
+
+    void onCheckedHod(CompoundButton buttonView, boolean isChecked) {
+        if (isChecked) ViewAnimation.expand(moreV.hodContent);
+        else ViewAnimation.collapse(moreV.hodContent);
+    }
+
+    void onClickedHodInfo(View view) {
+
+    }
+
+    void onCheckFreeShipping(CompoundButton buttonView, boolean isChecked) {
+        if (isChecked) moreV.shippingCharge.setVisibility(View.INVISIBLE);
+        else moreV.shippingCharge.setVisibility(View.VISIBLE);
+    }
+
+    private void onClickedShippingCharge(View view) {
+        String dRange = moreV.deliveryRangeValue.getText().toString().trim();
+        if (TextUtils.isEmpty(dRange)) {
+            moreV.deliveryRange.setError("Invalid!!");
+            return;
+        }
+
+        Intent intent = new Intent(this, ShippingChargeActivity.class);
+        intent.putExtra(ShippingChargeActivity.D_RANGE, Double.parseDouble(dRange));
+        startActivityForResult(intent, RC_SHIPPING_CHARGE);
+    }
+
+    void onClickedPassiveOpenInfo(View view) {
+        String title = "Passive Open";
+        String message = "Enabling passive open will allow customers to place order even when the business is not actively open. You can accept the order later to deliver.";
+        new AlertDialog.Builder(this).setTitle(title).setMessage(message).setPositiveButton("GOT IT", null).create().show();
+    }
+
+    void showPlacePicker(View view) {
+        CreateLocationDialog dialog = new CreateLocationDialog();
+        if (hasEditMode && updatedBusiness.getLocation() != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString(CreateLocationDialog.KEY_LOCATION, new Gson().toJson(updatedBusiness.getLocation()));
+            dialog.setArguments(bundle);
+        }
+        dialog.show(getSupportFragmentManager(), "");
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    void onClickedSubmit(View btnView) {
+        String displayName = infoV.nameTiet.getText().toString().trim();
+        String businessId = infoV.idTiet.getText().toString().trim();
+        String businessType = infoV.typeActv.getText().toString().trim();
+        String mobileNumber = contactV.mobileNoTiet.getText().toString().trim();
+        String email = contactV.emailTiet.getText().toString().trim();
+        String website = contactV.websiteTiet.getText().toString().trim();
+
+        if (TextUtils.isEmpty(displayName)) {
+            infoV.nameTil.setError("Input require");
+            return;
+        }
+        if (TextUtils.isEmpty(businessId)) {
+            infoV.idTil.setError("Input require");
+            return;
+        }
+        if (TextUtils.isEmpty(mobileNumber)) {
+            contactV.mobileNoTil.setError("Input require");
+            return;
+        }
+        if (mOpeningTime == null) {
+            showToast("Select opening time");
+            moreV.openingTimeBtn.performClick();
+            return;
+        }
+        if (mClosingTime == null) {
+            showToast("Select closing time");
+            moreV.closingTimeBtn.performClick();
+            return;
+        }
+        if (!mClosingTime.isBuggerThan(mOpeningTime)) {
+            showToast("Invalid opening or closing time");
+            return;
+        }
+        if (mSelectedOpeningDays == null || mSelectedOpeningDays.isEmpty()) {
+            moreV.selectDaysBtn.performClick();
+            showToast("Select opening days");
+            return;
+        }
+
+        String minOrder = moreV.minOrderValue.getText().toString().trim();
+        String deliveryRange = moreV.deliveryRangeValue.getText().toString().trim();
+        if (moreV.hod.isChecked()) {
+            if (!moreV.freeShipping.isChecked()) {
+                if (mMaxRange < Double.parseDouble(deliveryRange)) {
+                    new AlertDialog.Builder(this).setTitle("Set shipping charge")
+                            .setMessage("Shipping charge is require if your business don't provide free shipping")
+                            .setPositiveButton("Set Charge", ((dialog, which) -> moreV.shippingCharge.performClick()))
+                            .show();
+                    return;
+                }
+            }
+
+            if (TextUtils.isEmpty(minOrder)) minOrder = "0";
+            if (TextUtils.isEmpty(deliveryRange)) {
+                moreV.deliveryRange.setError("Invalid input");
+                return;
+            }
+        }
+
+
+        if (updatedBusiness.getLocation() == null) {
+            showToast("Add business location.");
+            return;
+        }
+        if (mImageUris == null || mImageUris.size() == 0) {
+            String message = "At least add an image";
+            MessageUtils.showActionShortSnackBar(findViewById(android.R.id.content), message, "ADD IMAGE", 0, (view, requestCode) -> {
+                new ImagePicker(this, ImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
+            });
+            return;
+        }
+
+        Log.v(TAG, mSelectedOpeningDays.toString());
+
+
+        updatedBusiness.setCreator(Preferences.getInstance(getApplicationContext()).getObject(PreferenceKey.USER, User.class).getUserId());
+        updatedBusiness.setDisplayName(displayName);
+        updatedBusiness.setBusinessId(businessId);
+        updatedBusiness.setBusinessType(businessType);
+        updatedBusiness.setMobileNumber(mobileNumber);
+        updatedBusiness.setEmail(email);
+        updatedBusiness.setWebsite(website);
+        updatedBusiness.setOpeningTime(mOpeningTime);
+        updatedBusiness.setClosingTime(mClosingTime);
+        updatedBusiness.setOpeningDays(new WeekDayHelper().getWeekDaysCode(new ArrayList<>(mSelectedOpeningDays).toArray(new String[0])));
+        updatedBusiness.setDeliveryRange(Double.valueOf(deliveryRange));
+        updatedBusiness.setPassiveOpenEnable(moreV.passiveOpen.isChecked());
+
+        if (mVerifiedMobileNumber != null && !mVerifiedMobileNumber.equals(mobileNumber)) {
+            mHasVerifiedMobileNumber = false;
+        }
+
+        Log.d(TAG, "mHasVerifiedMobileNumber: " + mHasVerifiedMobileNumber);
+        if (mHasVerifiedMobileNumber) {
+            createBusiness();
+        } else {
+            verifyMobileNumber(mobileNumber);
+        }
+    }
+    // end: onClicks
+
+    private void initiateUI() {
+        contactV.mobileNoTiet.addTextChangedListener(this);
+        infoV.nameTiet.addTextChangedListener(this);
+        infoV.idTiet.addTextChangedListener(this);
+
+        RecyclerView mRecyclerView = findViewById(R.id.image_rv);
         mRecyclerView.setHasFixedSize(true);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -209,12 +380,12 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
     }
 
     private void setUpUiFromBusiness() {
-        mDisplayNameTIET.setText(updatedBusiness.getDisplayName());
-        mBusinessIdTIET.setText(updatedBusiness.getBusinessId());
-        mBusinessTypeACTV.setText(updatedBusiness.getBusinessType());
-        mMobileNumberTIET.setText(updatedBusiness.getMobileNumber());
-        mEmailTIET.setText(updatedBusiness.getEmail());
-        mWebsiteTIL.getEditText().setText(updatedBusiness.getWebsite());
+        infoV.nameTiet.setText(updatedBusiness.getDisplayName());
+        infoV.idTiet.setText(updatedBusiness.getBusinessId());
+        infoV.typeActv.setText(updatedBusiness.getBusinessType());
+        contactV.mobileNoTiet.setText(updatedBusiness.getMobileNumber());
+        contactV.emailTiet.setText(updatedBusiness.getEmail());
+        contactV.websiteTiet.setText(updatedBusiness.getWebsite());
 
         Location location = updatedBusiness.getLocation();
         if (location != null) {
@@ -236,25 +407,25 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
         mOldBusinessId = updatedBusiness.getBusinessId();
         mOpeningTime = updatedBusiness.getOpeningTime();
         if (mOpeningTime != null)
-            mOpeningTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", mOpeningTime.getHour(), mOpeningTime.getMinute(), mOpeningTime.getZone()));
+            moreV.openingTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", mOpeningTime.getHour(), mOpeningTime.getMinute(), mOpeningTime.getZone()));
 
         mClosingTime = updatedBusiness.getClosingTime();
         if (mClosingTime != null)
-            mClosingTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", mClosingTime.getHour(), mClosingTime.getMinute(), mClosingTime.getZone()));
+            moreV.closingTimeTv.setText(String.format(Locale.ENGLISH, "%d:%d %s", mClosingTime.getHour(), mClosingTime.getMinute(), mClosingTime.getZone()));
 
         if (updatedBusiness.getOpeningDays() != null)
             mSelectedOpeningDays = new HashSet<>(Arrays.asList(new WeekDayHelper().decodeDays(updatedBusiness.getOpeningDays())));
 
         if (updatedBusiness.getDeliveryRange() != null)
-            mDeliveryRangeTIET.setText(String.format("%s", updatedBusiness.getDeliveryRange()));
+            moreV.deliveryRangeValue.setText(String.format("%s", updatedBusiness.getDeliveryRange()));
 
         if (updatedBusiness.getPassiveOpenEnable() != null)
-            mPassiveOpenCB.setChecked(updatedBusiness.getPassiveOpenEnable());
+            moreV.passiveOpen.setChecked(updatedBusiness.getPassiveOpenEnable());
     }
 
     private void setUpUiFromUser() {
-        mEmailTIET.setText(user.getEmail());
-        mMobileNumberTIET.setText(user.getPhoneNumber());
+        contactV.emailTiet.setText(user.getEmail());
+        contactV.mobileNoTiet.setText(user.getPhoneNumber());
 
         if (user.isHasPhoneNumberVerified() && user.getPhoneNumber() != null && !TextUtils.isEmpty(user.getPhoneNumber()) && Validate.isPhoneNumber(user.getPhoneNumber())) {
             mHasVerifiedMobileNumber = true;
@@ -264,9 +435,9 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
 
     private void setUpLocation(Location location) {
         updatedBusiness.setLocation(location);
-        mAddOrChangeLocationBtn.setText("Change location");
+        binding.selectLocationBtn.setText("Change location");
         String howToReach = location.getHowToReach() == null ? "" : "\n\n" + location.getHowToReach();
-        mSelectedLocationTV.setText(String.format("%s%s", location.getAddressLine(), howToReach));
+        binding.selectedLocationTv.setText(String.format("%s%s", location.getAddressLine(), howToReach));
     }
 
     private void getBusinessType() {
@@ -277,7 +448,7 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
                 if (businessTypes == null) return;
                 Collections.sort(businessTypes, (String::compareToIgnoreCase));
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(CreateBusinessActivity.this, R.layout.dropdown_menu_popup_item, businessTypes);
-                mBusinessTypeACTV.setAdapter(adapter);
+                infoV.typeActv.setAdapter(adapter);
             }
         }).addOnFailureListener(e -> Log.v(TAG, "Error: " + e));
     }
@@ -307,6 +478,18 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
+            case RC_SHIPPING_CHARGE: {
+                if (resultCode == RESULT_OK && data != null) {
+                    String listData = data.getStringExtra(ShippingChargeActivity.DATA);
+                    mMaxRange = data.getIntExtra(ShippingChargeActivity.MAX_RANGE, 0);
+
+                    if (listData != null) {
+                        businessV4.setShippingCharges(new Gson().fromJson(listData, new TypeToken<List<OSDeliveryCharge>>() {
+                        }.getType()));
+                    }
+                }
+                break;
+            }
             case RC_INTENT_VERIFY_MOBILE_NUMBER: {
                 if (resultCode == RESULT_OK && data != null) {
                     mHasVerifiedMobileNumber = true;
@@ -327,169 +510,6 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
                 }
                 break;
             }
-        }
-    }
-
-    @OnClick(R.id.btn_acs_select_location)
-    void showPlacePicker() {
-        CreateLocationDialog dialog = new CreateLocationDialog();
-        if (hasEditMode && updatedBusiness.getLocation() != null) {
-            Bundle bundle = new Bundle();
-            bundle.putString(CreateLocationDialog.KEY_LOCATION, new Gson().toJson(updatedBusiness.getLocation()));
-            dialog.setArguments(bundle);
-        }
-        dialog.show(getSupportFragmentManager(), "");
-    }
-
-    @OnClick(R.id.btn_acs_opening)
-    void onClickedSelectOpeningTime() {
-        Calendar calendar = Calendar.getInstance();
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-            mOpeningTime = new Time(selectedHour, selectedMinute, selectedHour > 12 ? Time.PM : Time.AM);
-            mOpeningTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", mOpeningTime.getHour(), mOpeningTime.getMinute(), mOpeningTime.getZone()));
-        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
-
-
-        TextView titleTV = new TextView(this);
-        titleTV.setGravity(Gravity.CENTER);
-        titleTV.setTextColor(Color.WHITE);
-        titleTV.setBackgroundColor(getColor(R.color.colorAccent));
-        titleTV.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20f);
-        titleTV.setPadding(20, 20, 20, 20);
-        titleTV.setText(Html.fromHtml("<b>Select opening time</b>"));
-
-        timePickerDialog.setCustomTitle(titleTV);
-        timePickerDialog.show();
-    }
-
-    @OnClick(R.id.btn_acs_closing)
-    void onClickedSelectClosingTime() {
-        Calendar calendar = Calendar.getInstance();
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-            mClosingTime = new Time(selectedHour, selectedMinute, selectedHour > 12 ? Time.PM : Time.AM);
-            mClosingTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", mClosingTime.getHour(), mClosingTime.getMinute(), mClosingTime.getZone()));
-        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
-
-
-        TextView titleTV = new TextView(this);
-        titleTV.setGravity(Gravity.CENTER);
-        titleTV.setTextColor(Color.WHITE);
-        titleTV.setBackgroundColor(getColor(R.color.colorAccent));
-        titleTV.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20f);
-        titleTV.setPadding(20, 20, 20, 20);
-        titleTV.setText(Html.fromHtml("<b>Select closing time</b>"));
-
-        timePickerDialog.setCustomTitle(titleTV);
-        timePickerDialog.show();
-    }
-
-    @OnClick(R.id.btn_acs_select_days)
-    void onClickedSelectDays() {
-        String title = "Choose opening days";
-        String[] weekDays = new WeekDayHelper().getWeekDays();
-        HashSet<String> newSet = (HashSet<String>) mSelectedOpeningDays.clone();
-
-        boolean[] checkedItem = new boolean[weekDays.length];
-        for (int i = 0; i < weekDays.length; i++)
-            if (mSelectedOpeningDays.contains(weekDays[i])) checkedItem[i] = true;
-
-        new AlertDialog.Builder(this).setTitle(title).setMultiChoiceItems(weekDays, checkedItem, (dialog, which, isChecked) -> {
-            if (isChecked) newSet.add(weekDays[which]);
-            else newSet.remove(weekDays[which]);
-        }).setPositiveButton("OK", (dialog, which) -> {
-            // TODO: display selected days
-            mSelectedOpeningDays = newSet;
-        }).setNegativeButton("Cancel", null).create().show();
-    }
-
-    @OnClick(R.id.iv_acs_passive_open_info)
-    void onClickedPassiveOpenInfo() {
-        String title = "Passive Open";
-        String message = "Enabling passive open will allow customers to place order even when the business is not actively open. You can accept the order later to deliver.";
-        new AlertDialog.Builder(this).setTitle(title).setMessage(message).setPositiveButton("GOT IT", null).create().show();
-    }
-
-    @OnClick(R.id.tv_acs_submit)
-    void onClickedSubmit() {
-        String displayName = mDisplayNameTIL.getEditText().getText().toString().trim();
-        String businessId = mBusinessIdTIL.getEditText().getText().toString().trim();
-        String businessType = mBusinessTypeTIL.getEditText().getText().toString().trim();
-        String mobileNumber = mMobileNumberTIL.getEditText().getText().toString().trim();
-        String email = mEmailTIL.getEditText().getText().toString().trim();
-        String website = mWebsiteTIL.getEditText().getText().toString().trim();
-        String deliveryRange = mDeliveryRangeTIL.getEditText().getText().toString().trim();
-
-        if (TextUtils.isEmpty(displayName)) {
-            mDisplayNameTIL.setError("Input require");
-            return;
-        }
-        if (TextUtils.isEmpty(businessId)) {
-            mBusinessIdTIL.setError("Input require");
-            return;
-        }
-        if (TextUtils.isEmpty(mobileNumber)) {
-            mMobileNumberTIL.setError("Input require");
-            return;
-        }
-        if (mOpeningTime == null) {
-            showToast("Select opening time");
-            onClickedSelectOpeningTime();
-            return;
-        }
-        if (mClosingTime == null) {
-            showToast("Select closing time");
-            onClickedSelectClosingTime();
-            return;
-        }
-        if (!mClosingTime.isBuggerThan(mOpeningTime)) {
-            showToast("Invalid opening or closing time");
-            return;
-        }
-        if (mSelectedOpeningDays == null || mSelectedOpeningDays.isEmpty()) {
-            onClickedSelectDays();
-            showToast("Select opening days");
-            return;
-        }
-        if (TextUtils.isEmpty(deliveryRange)) {
-            mDeliveryRangeTIL.setError("Invalid input");
-            return;
-        }
-        if (updatedBusiness.getLocation() == null) {
-            showToast("Add business location.");
-            return;
-        }
-        if (mImageUris == null || mImageUris.size() == 0) {
-            String message = "At least add an image";
-            MessageUtils.showActionShortSnackBar(findViewById(android.R.id.content), message, "ADD IMAGE", 0, (view, requestCode) -> {
-                new ImagePicker(this, ImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
-            });
-            return;
-        }
-
-        Log.v(TAG, mSelectedOpeningDays.toString());
-
-        updatedBusiness.setCreator(Preferences.getInstance(getApplicationContext()).getObject(PreferenceKey.USER, User.class).getUserId());
-        updatedBusiness.setDisplayName(displayName);
-        updatedBusiness.setBusinessId(businessId);
-        updatedBusiness.setBusinessType(businessType);
-        updatedBusiness.setMobileNumber(mobileNumber);
-        updatedBusiness.setEmail(email);
-        updatedBusiness.setWebsite(website);
-        updatedBusiness.setOpeningTime(mOpeningTime);
-        updatedBusiness.setClosingTime(mClosingTime);
-        updatedBusiness.setOpeningDays(new WeekDayHelper().getWeekDaysCode(new ArrayList<>(mSelectedOpeningDays).toArray(new String[0])));
-        updatedBusiness.setDeliveryRange(Double.valueOf(deliveryRange));
-        updatedBusiness.setPassiveOpenEnable(mPassiveOpenCB.isChecked());
-
-        if (mVerifiedMobileNumber != null && !mVerifiedMobileNumber.equals(mobileNumber)) {
-            mHasVerifiedMobileNumber = false;
-        }
-
-        Log.d(TAG, "mHasVerifiedMobileNumber: " + mHasVerifiedMobileNumber);
-        if (mHasVerifiedMobileNumber) {
-            createBusiness();
-        } else {
-            verifyMobileNumber(mobileNumber);
         }
     }
 
@@ -521,18 +541,18 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         int hashCode = s.hashCode();
-        if (mDisplayNameTIET.getText().hashCode() == hashCode) {
-            mDisplayNameTIL.setErrorEnabled(false);
-        } else if (mBusinessIdTIET.getText().hashCode() == hashCode) {
-            mBusinessIdTIL.setErrorEnabled(false);
-        } else if (mMobileNumberTIET.getText().hashCode() == hashCode) {
-            mMobileNumberTIL.setErrorEnabled(false);
+        if (infoV.nameTiet.getText().hashCode() == hashCode) {
+            infoV.nameTil.setErrorEnabled(false);
+        } else if (infoV.idTiet.getText().hashCode() == hashCode) {
+            infoV.idTil.setErrorEnabled(false);
+        } else if (contactV.mobileNoTiet.getText().hashCode() == hashCode) {
+            contactV.mobileNoTil.setErrorEnabled(false);
         }
     }
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        if (mMobileNumberTIET.getText().hashCode() == s.hashCode()) {
+        if (contactV.mobileNoTiet.getText().hashCode() == s.hashCode()) {
             String no = s.toString();
             Log.v(TAG, "Phone no. " + mVerifiedMobileNumber);
             Log.v(TAG, "Phone no. " + no);
@@ -560,12 +580,11 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
                 setResult(RESULT_OK, intent);
                 finish();
             } else if (status != null && status == 401) {
-                mBusinessIdTIL.setError("Business ID is not available");
+                infoV.idTil.setError("Business ID is not available");
                 Toast.makeText(this, "Business ID is not available.", Toast.LENGTH_SHORT).show();
             } else if (status != null && status == 204) {
                 String message = getString(R.string.app_name) + " is not available in the selected area.";
-                mBusinessIdTIL.setError(message);
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                new AlertDialog.Builder(this).setTitle("Update failed").setMessage(message).setPositiveButton("Ok", null).show();
             }
         } else if (request == RC_NETWORK_EDIT_BUSINESS) {
             JSONObject jsonResponse = JsonParse.stringToObject(response);
@@ -575,12 +594,11 @@ public class CreateBusinessActivity extends AppCompatActivity implements TextWat
                 Toast.makeText(this, "Uploading...", Toast.LENGTH_SHORT).show();
                 onBackPressed();
             } else if (status != null && status == 401) {
-                mBusinessIdTIL.setError("Business ID is not available");
+                infoV.idTil.setError("Business ID is not available");
                 Toast.makeText(this, "Business ID is not available.", Toast.LENGTH_SHORT).show();
             } else if (status != null && status == 204) {
                 String message = getString(R.string.app_name) + " is not available in the selected area.";
-                mBusinessIdTIL.setError(message);
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                new AlertDialog.Builder(this).setTitle("Update failed").setMessage(message).setPositiveButton("Ok", null).show();
             }
         }
     }

@@ -75,7 +75,7 @@ public class SignInActivity extends AppCompatActivity implements MessageUtils.On
 
     @BindView(android.R.id.content)
     View mParentView;
-    @BindView(R.id.pb_iasiwg_loading)
+    @BindView(R.id.loading_pbar)
     ProgressBar mLoadingPb;
 
     private AlertDialog mLoadingDialog;
@@ -85,7 +85,7 @@ public class SignInActivity extends AppCompatActivity implements MessageUtils.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_in_with_google);
+        setContentView(R.layout.activity_sign_in);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         ButterKnife.bind(this);
 
@@ -267,7 +267,7 @@ public class SignInActivity extends AppCompatActivity implements MessageUtils.On
         });
     }
 
-    @OnClick(R.id.iasiwg_sign_in_button)
+    @OnClick(R.id.sign_in_btn)
     void signInWithGoogle() {
         AppController.getInstance().getGoogleSignInClient().signOut();
         AppController.getInstance().setGoogleSignInClient(null);
