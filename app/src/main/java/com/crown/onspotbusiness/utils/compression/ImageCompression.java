@@ -16,8 +16,8 @@ import id.zelory.compressor.Compressor;
 public class ImageCompression {
     private final String TAG = ImageCompression.class.getName();
 
-    private Context context;
-    private Uri imageUri;
+    private final Context context;
+    private final Uri imageUri;
 
     public ImageCompression(Context context, Uri imageUri) {
         this.context = context;

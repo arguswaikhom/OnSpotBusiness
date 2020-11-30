@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,6 +29,8 @@ import com.crown.library.onspotlibrary.model.business.BusinessV6;
 import com.crown.library.onspotlibrary.model.businessItem.BusinessItemOSB;
 import com.crown.library.onspotlibrary.utils.BusinessItemUtils;
 import com.crown.library.onspotlibrary.utils.InputFilterMinMax;
+import com.crown.library.onspotlibrary.utils.OSImagePicker;
+import com.crown.library.onspotlibrary.utils.OSListUtils;
 import com.crown.library.onspotlibrary.utils.OSMessage;
 import com.crown.library.onspotlibrary.utils.emun.BusinessItemPriceUnit;
 import com.crown.library.onspotlibrary.utils.emun.OSDiscountType;
@@ -36,7 +39,6 @@ import com.crown.library.onspotlibrary.views.LoadingBounceDialog;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.databinding.ActivityModifyBusinessItemBinding;
 import com.crown.onspotbusiness.model.MenuItemImage;
-import com.crown.onspotbusiness.utils.ImagePicker;
 import com.crown.onspotbusiness.utils.abstracts.OnCardImageRemove;
 import com.crown.onspotbusiness.utils.compression.ImageCompression;
 import com.crown.onspotbusiness.view.ListItemAdapter;
@@ -52,6 +54,7 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -62,12 +65,7 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
     private static final String TAG = ModifyBusinessItemActivity.class.getName();
     public ActivityModifyBusinessItemBinding binding;
 
-    private ListItemAdapter mAdapter;
-    private List<ListItem> mImageUris;
-    private BusinessItemOSB originalItem;
-    private BusinessItemOSB updatedItem;
-    private LoadingBounceDialog loading;
-    private TextWatcher textWatcher = new TextWatcher() {
+    private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         @SuppressWarnings("ConstantConditions")
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -128,6 +126,12 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
 
         }
     };
+    private ListItemAdapter mAdapter;
+    private List<ListItem> mImageUris;
+    private BusinessItemOSB originalItem;
+    private BusinessItemOSB updatedItem;
+    private BusinessV6 business;
+    private LoadingBounceDialog loading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +139,7 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
         binding = ActivityModifyBusinessItemBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        business = OSPreferences.getInstance(this).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
         loading = new LoadingBounceDialog(this);
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -151,7 +156,15 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
             updatedItem = new BusinessItemOSB();
             binding.discountTypeBtn.setText(OSDiscountType.NO_DISCOUNT.getName());
         }
-        getCategory();
+        addProductCategories();
+    }
+
+    private void addProductCategories() {
+        if (business == null || OSListUtils.isEmpty(business.getProductCategories())) return;
+        List<String> categories = business.getProductCategories();
+        Collections.sort(categories, (String::compareToIgnoreCase));
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, categories);
+        binding.categoriesActv.setAdapter(adapter);
     }
 
     private void setUpRecycler() {
@@ -184,10 +197,6 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
         if (discountType != OSDiscountType.NO_DISCOUNT) {
             binding.discountValueTiet.setEnabled(true);
         }
-    }
-
-    private void getCategory() {
-        // TODO: Get item categories and show
     }
 
     private void initiateUI() {
@@ -325,7 +334,12 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
         }
 
         if (mImageUris == null || mImageUris.size() == 0) {
-            OSMessage.showAIBar(this, "At least add an image", "Add Image", v -> new ImagePicker(this, ImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery());
+            OSMessage.showAIBar(this, "At least add an image", "Add Image", v -> new OSImagePicker(this, OSImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery());
+            return;
+        }
+
+        if (mImageUris.size() > 3) {
+            OSMessage.showLToast(this, "Maximum 3 images can add in a product");
             return;
         }
 
@@ -337,7 +351,6 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
         String itemId;
         Task<Void> voidTask;
         if (originalItem == null) {
-            BusinessV6 business = OSPreferences.getInstance(this).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
             DocumentReference doc = FirebaseFirestore.getInstance().collection(getString(R.string.ref_item)).document();
             updatedItem.setBusinessRefId(business.getBusinessRefId());
             updatedItem.setItemId(doc.getId());
@@ -370,7 +383,7 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
                 onBackPressed();
                 return true;
             case R.id.nav_omaocb_select_image:
-                new ImagePicker(this, ImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
+                new OSImagePicker(this, OSImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -379,7 +392,7 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ImagePicker.RC_SELECT_MULTIPLE_IMAGES && resultCode == RESULT_OK && data != null) {
+        if (requestCode == OSImagePicker.RC_SELECT_MULTIPLE_IMAGES && resultCode == RESULT_OK && data != null) {
             if (data.getClipData() != null) {
                 // mImageUris.clear();
                 int count = data.getClipData().getItemCount();
@@ -391,10 +404,6 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
                 mAdapter.notifyDataSetChanged();
             }
         }
-    }
-
-    public List<ListItem> getImageUris() {
-        return mImageUris;
     }
 
     @Override
@@ -419,7 +428,6 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
 
     private void uploadItemImages(String itemId) {
         List<MenuItemImage> imageUris = (List<MenuItemImage>) (List<?>) mImageUris;
-        BusinessV6 business = OSPreferences.getInstance(this).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
 
         for (MenuItemImage menuImage : imageUris) {
             Log.v(TAG, "image: " + menuImage.getImage().toString());

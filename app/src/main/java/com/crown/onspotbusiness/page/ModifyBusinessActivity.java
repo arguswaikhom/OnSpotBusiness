@@ -14,7 +14,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,30 +30,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.crown.library.onspotlibrary.controller.OSPreferences;
+import com.crown.library.onspotlibrary.controller.OSViewAnimation;
 import com.crown.library.onspotlibrary.model.ListItem;
-import com.crown.library.onspotlibrary.model.OSDeliveryCharge;
 import com.crown.library.onspotlibrary.model.OSLocation;
+import com.crown.library.onspotlibrary.model.OSShippingCharge;
 import com.crown.library.onspotlibrary.model.OSTime;
 import com.crown.library.onspotlibrary.model.business.BusinessV6;
 import com.crown.library.onspotlibrary.model.user.UserOSB;
+import com.crown.library.onspotlibrary.utils.OSImagePicker;
+import com.crown.library.onspotlibrary.utils.OSMessage;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
+import com.crown.library.onspotlibrary.views.LoadingBounceDialog;
 import com.crown.library.onspotlibrary.views.OSCreateLocationDialog;
 import com.crown.onspotbusiness.R;
-import com.crown.onspotbusiness.controller.ViewAnimation;
 import com.crown.onspotbusiness.databinding.ActivityCreateShopBinding;
 import com.crown.onspotbusiness.databinding.IvEditBusinessContactBinding;
 import com.crown.onspotbusiness.databinding.IvEditBusinessInfoBinding;
 import com.crown.onspotbusiness.databinding.IvEditBusinessMoreBinding;
 import com.crown.onspotbusiness.model.MenuItemImage;
-import com.crown.onspotbusiness.model.Time;
-import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.utils.ImagePicker;
-import com.crown.onspotbusiness.utils.MessageUtils;
 import com.crown.onspotbusiness.utils.WeekDayHelper;
 import com.crown.onspotbusiness.utils.abstracts.OnCardImageRemove;
 import com.crown.onspotbusiness.utils.compression.ImageCompression;
-import com.crown.onspotbusiness.utils.preference.PreferenceKey;
-import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.crown.onspotbusiness.view.ListItemAdapter;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
@@ -64,7 +60,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -85,18 +80,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     boolean mVerifiedNo = false;
     private ListItemAdapter mAdapter;
     private List<ListItem> mImageUris;
-    private AlertDialog mLoadingDialog;
-    private IvEditBusinessInfoBinding infoV;
-    private IvEditBusinessContactBinding contactV;
-    private IvEditBusinessMoreBinding moreV;
-    private ActivityCreateShopBinding binding;
-
-    private int mMaxRange;
-    private UserOSB mCurrentUser;
-    private BusinessV6 mOriginalBusiness;
-    private BusinessV6 mModifiedBusiness = new BusinessV6();
-    private HashSet<String> mSelectedOpeningDays = new HashSet<>();
-    private TextWatcher mOnTextChanges = new TextWatcher() {
+    private final TextWatcher mOnTextChanges = new TextWatcher() {
         @Override
         @SuppressWarnings("ConstantConditions")
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -104,8 +88,6 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             try {
                 if (infoV.nameTiet.getText().hashCode() == hashCode) {
                     infoV.nameTil.setErrorEnabled(false);
-                } else if (infoV.idTiet.getText().hashCode() == hashCode) {
-                    infoV.idTil.setErrorEnabled(false);
                 } else if (contactV.mobileNoTiet.getText().hashCode() == hashCode) {
                     contactV.mobileNoTil.setErrorEnabled(false);
                 }
@@ -123,8 +105,6 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             try {
                 if (code == infoV.nameTiet.getText().hashCode()) {
                     mModifiedBusiness.setDisplayName(value);
-                } else if (code == infoV.idTiet.getText().hashCode()) {
-                    mModifiedBusiness.setBusinessId(value);
                 } else if (code == infoV.typeActv.getText().hashCode()) {
                     mModifiedBusiness.setBusinessType(value);
                 } else if (code == contactV.mobileNoTiet.getText().hashCode()) {
@@ -134,7 +114,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
                     mModifiedBusiness.setEmail(value);
                 } else if (code == contactV.websiteTiet.getText().hashCode()) {
                     mModifiedBusiness.setWebsite(value);
-                } else if (code == moreV.minOrderValue.getText().hashCode()) {
+                } else if (code == moreV.minOrderTiet.getText().hashCode()) {
                     mModifiedBusiness.setMinOrder(Long.parseLong(value));
                 } else if (code == moreV.deliveryRangeValue.getText().hashCode()) {
                     mModifiedBusiness.setDeliveryRange(Long.valueOf(value));
@@ -149,6 +129,16 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
         }
     };
+    private IvEditBusinessInfoBinding infoV;
+    private IvEditBusinessContactBinding contactV;
+    private IvEditBusinessMoreBinding moreV;
+    private ActivityCreateShopBinding binding;
+
+    private UserOSB mCurrentUser;
+    private BusinessV6 mOriginalBusiness;
+    private BusinessV6 mModifiedBusiness = new BusinessV6();
+    private LoadingBounceDialog loadingDialog;
+    private HashSet<String> mSelectedOpeningDays = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,7 +170,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     void onClickedSelectOpeningTime(View view) {
         Calendar calendar = Calendar.getInstance();
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-            OSTime ot = new OSTime(selectedHour, selectedMinute, selectedHour > 12 ? Time.PM : Time.AM);
+            OSTime ot = new OSTime(selectedHour, selectedMinute, selectedHour > 12 ? OSTime.PM : OSTime.AM);
             mModifiedBusiness.setOpeningTime(ot);
             moreV.openingTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", ot.getHour(), ot.getMinute(), ot.getZone()));
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
@@ -200,7 +190,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     void onClickedSelectClosingTime(View view) {
         Calendar calendar = Calendar.getInstance();
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-            OSTime ct = new OSTime(selectedHour, selectedMinute, selectedHour > 12 ? Time.PM : Time.AM);
+            OSTime ct = new OSTime(selectedHour, selectedMinute, selectedHour > 12 ? OSTime.PM : OSTime.AM);
             mModifiedBusiness.setClosingTime(ct);
             moreV.closingTimeTv.setText(String.format(Locale.ENGLISH, "%d:%d %s", ct.getHour(), ct.getMinute(), ct.getZone()));
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
@@ -237,12 +227,12 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
     void onCheckedHod(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
-            ViewAnimation.expand(moreV.hodContent);
+            OSViewAnimation.expand(moreV.hodContent);
             if (mModifiedBusiness.getMinOrder() != null)
-                moreV.minOrderValue.setText(String.valueOf(mModifiedBusiness.getMinOrder()));
+                moreV.minOrderTiet.setText(String.valueOf(mModifiedBusiness.getMinOrder()));
             if (mModifiedBusiness.getDeliveryRange() != null)
                 moreV.deliveryRangeValue.setText(String.valueOf(mModifiedBusiness.getDeliveryRange()));
-        } else ViewAnimation.collapse(moreV.hodContent);
+        } else OSViewAnimation.collapse(moreV.hodContent);
         mModifiedBusiness.setHodAvailable(isChecked);
     }
 
@@ -264,10 +254,9 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             return;
         }
 
-        Intent intent = new Intent(this, ShippingChargeActivity.class);
-        intent.putExtra(ShippingChargeActivity.D_RANGE, Double.parseDouble(dRange));
-        if (mModifiedBusiness.getShippingCharges() != null && !mModifiedBusiness.getShippingCharges().isEmpty())
-            intent.putExtra(ShippingChargeActivity.DATA, new Gson().toJson(mModifiedBusiness.getShippingCharges()));
+        Intent intent = new Intent(this, DeliveryChargeActivity.class);
+        if (mModifiedBusiness.getShippingCharges() != null)
+            intent.putExtra(DeliveryChargeActivity.PRE_DELIVERY_CHARGE, new Gson().toJson(mModifiedBusiness.getShippingCharges()));
         startActivityForResult(intent, RC_SHIPPING_CHARGE);
     }
 
@@ -294,10 +283,10 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             infoV.nameTil.setError("Input require");
             return;
         }
-        if (TextUtils.isEmpty(infoV.idTiet.getText().toString().trim())) {
+        /*if (TextUtils.isEmpty(infoV.idTiet.getText().toString().trim())) {
             infoV.idTil.setError("Input require");
             return;
-        }
+        }*/
         if (TextUtils.isEmpty(contactV.mobileNoTiet.getText().toString().trim())) {
             contactV.mobileNoTil.setError("Input require");
             return;
@@ -328,12 +317,11 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             return;
         }
 
-        String minOrder = moreV.minOrderValue.getText().toString().trim();
+        String minOrder = moreV.minOrderTiet.getText().toString().trim();
         String deliveryRange = moreV.deliveryRangeValue.getText().toString().trim();
         if (moreV.hod.isChecked()) {
             if (!moreV.freeShipping.isChecked()) {
-                if (mModifiedBusiness.getShippingCharges() == null
-                        || mModifiedBusiness.getShippingCharges().get(mModifiedBusiness.getShippingCharges().size() - 1).getTo() < Long.parseLong(deliveryRange)) {
+                if (mModifiedBusiness.getShippingCharges() == null || mModifiedBusiness.getShippingCharges().getPerOrder() == null) {
                     new AlertDialog.Builder(this).setTitle("Set shipping charge")
                             .setMessage("Shipping charge is require if your business don't provide free shipping")
                             .setPositiveButton("Set Charge", ((dialog, which) -> moreV.shippingCharge.performClick()))
@@ -354,13 +342,15 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         }
         if (mImageUris == null || mImageUris.size() == 0) {
             String message = "At least add an image";
-            MessageUtils.showActionShortSnackBar(findViewById(android.R.id.content), message, "ADD IMAGE", 0, (view, requestCode) -> {
-                new ImagePicker(this, ImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
-            });
+            OSMessage.showAIBar(this, message, "Add image", v -> new OSImagePicker(this, OSImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery());
             return;
         }
 
-        mModifiedBusiness.setPassiveOpenEnable(moreV.passiveOpen.isChecked());
+        if (mImageUris.size() > 5) {
+            OSMessage.showLToast(this, "Maximum 5 images can add in a business profile");
+            return;
+        }
+
         uploadBusiness();
     }
 
@@ -370,22 +360,20 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         moreV = binding.includeAcsMore;
 
         infoV.nameTiet.addTextChangedListener(mOnTextChanges);
-        infoV.idTiet.addTextChangedListener(mOnTextChanges);
         infoV.typeActv.addTextChangedListener(mOnTextChanges);
         contactV.mobileNoTiet.addTextChangedListener(mOnTextChanges);
         contactV.emailTiet.addTextChangedListener(mOnTextChanges);
         contactV.websiteTiet.addTextChangedListener(mOnTextChanges);
-        moreV.minOrderValue.addTextChangedListener(mOnTextChanges);
+        moreV.minOrderTiet.addTextChangedListener(mOnTextChanges);
         moreV.deliveryRangeValue.addTextChangedListener(mOnTextChanges);
 
         moreV.openingTimeBtn.setOnClickListener(this::onClickedSelectOpeningTime);
         moreV.closingTimeBtn.setOnClickListener(this::onClickedSelectClosingTime);
         moreV.selectDaysBtn.setOnClickListener(this::onClickedSelectDays);
         moreV.hod.setOnCheckedChangeListener(this::onCheckedHod);
-        moreV.hodInfo.setOnClickListener(this::onClickedHodInfo);
+        moreV.hodInfoIv.setOnClickListener(this::onClickedHodInfo);
         moreV.freeShipping.setOnCheckedChangeListener(this::onCheckFreeShipping);
         moreV.shippingCharge.setOnClickListener(this::onClickedShippingCharge);
-        moreV.passiveOpenInfo.setOnClickListener(this::onClickedPassiveOpenInfo);
         binding.selectLocationBtn.setOnClickListener(this::showPlacePicker);
         binding.submitBtn.setOnClickListener(this::onClickedSubmit);
 
@@ -398,9 +386,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         mImageUris = new ArrayList<>();
         mAdapter = new ListItemAdapter(this, mImageUris);
         mRecyclerView.setAdapter(mAdapter);
-
-        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_loading, null);
-        mLoadingDialog = new AlertDialog.Builder(this, R.style.LoadingDialogTheme).setView(dialogView).setCancelable(false).create();
+        loadingDialog = new LoadingBounceDialog(this);
     }
 
     private void setUpUiFromBusiness() {
@@ -412,7 +398,6 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         }
 
         infoV.nameTiet.setText(mOriginalBusiness.getDisplayName());
-        infoV.idTiet.setText(mOriginalBusiness.getBusinessId());
         infoV.typeActv.setText(mOriginalBusiness.getBusinessType());
         contactV.mobileNoTiet.setText(mOriginalBusiness.getMobileNumber());
         contactV.emailTiet.setText(mOriginalBusiness.getEmail());
@@ -430,16 +415,12 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
         if (mOriginalBusiness.getHodAvailable() != null && mOriginalBusiness.getHodAvailable()) {
             moreV.hod.setChecked(mOriginalBusiness.getHodAvailable());
-            moreV.minOrderValue.setText(String.format("%s", mOriginalBusiness.getMinOrder()));
+            moreV.minOrderTiet.setText(String.format("%s", mOriginalBusiness.getMinOrder()));
             moreV.deliveryRangeValue.setText(String.format("%s", mOriginalBusiness.getDeliveryRange()));
 
             if (mOriginalBusiness.getFsAvailable() != null)
                 moreV.freeShipping.setChecked(mOriginalBusiness.getFsAvailable());
         }
-
-        if (mOriginalBusiness.getPassiveOpenEnable() != null)
-            moreV.passiveOpen.setChecked(mOriginalBusiness.getPassiveOpenEnable());
-
 
         OSLocation location = mOriginalBusiness.getLocation();
         if (location != null) setUpLocation(location);
@@ -483,7 +464,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
                 return true;
             }
             case R.id.nav_omaocb_select_image: {
-                new ImagePicker(this, ImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
+                new OSImagePicker(this, OSImagePicker.RC_SELECT_MULTIPLE_IMAGES).fromGallery();
                 return true;
             }
         }
@@ -496,13 +477,8 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         switch (requestCode) {
             case RC_SHIPPING_CHARGE: {
                 if (resultCode == RESULT_OK && data != null) {
-                    String listData = data.getStringExtra(ShippingChargeActivity.DATA);
-                    mMaxRange = data.getIntExtra(ShippingChargeActivity.MAX_RANGE, 0);
-
-                    if (listData != null) {
-                        mModifiedBusiness.setShippingCharges(new Gson().fromJson(listData, new TypeToken<List<OSDeliveryCharge>>() {
-                        }.getType()));
-                    }
+                    String deliveryCharge = data.getStringExtra(DeliveryChargeActivity.DELIVERY_CHARGE);
+                    mModifiedBusiness.setShippingCharges(new Gson().fromJson(deliveryCharge, OSShippingCharge.class));
                 }
                 break;
             }
@@ -514,7 +490,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
                 }
                 break;
             }
-            case ImagePicker.RC_SELECT_MULTIPLE_IMAGES: {
+            case OSImagePicker.RC_SELECT_MULTIPLE_IMAGES: {
                 if (resultCode == RESULT_OK && data != null && data.getClipData() != null) {
                     int count = data.getClipData().getItemCount();
                     for (int i = 0; i < count; i++) {
@@ -530,7 +506,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     }
 
     private void uploadBusiness() {
-        mLoadingDialog.show();
+        loadingDialog.show();
         CollectionReference ref = FirebaseFirestore.getInstance().collection(this.getString(R.string.ref_business));
         if (mOriginalBusiness == null) {
             ref.add(mModifiedBusiness).addOnSuccessListener(doc -> onUploadSuccess(doc.getId())).addOnFailureListener(this::onUploadFailed);
@@ -541,14 +517,14 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     }
 
     private void onUploadSuccess(String bussRefId) {
-        mLoadingDialog.dismiss();
+        loadingDialog.dismiss();
         uploadItemImages(bussRefId);
         Toast.makeText(this, "Uploaded", Toast.LENGTH_SHORT).show();
         onBackPressed();
     }
 
     private void onUploadFailed(Exception e) {
-        mLoadingDialog.dismiss();
+        loadingDialog.dismiss();
         Toast.makeText(this, "Failed to upload!!", Toast.LENGTH_SHORT).show();
         Log.e(TAG, "Upload failed: " + e.getMessage());
         e.printStackTrace();
@@ -591,27 +567,27 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
      * @param businessRefId Reference ID of the business which the item belongs to
      */
     private void uploadItemImages(String businessRefId) {
-        String userId = Preferences.getInstance(getApplicationContext()).getObject(PreferenceKey.USER, User.class).getUserId();
+        UserOSB user = OSPreferences.getInstance(getApplicationContext()).getObject(OSPreferenceKey.USER, UserOSB.class);
 
         for (MenuItemImage menuImage : ((List<MenuItemImage>) (List<?>) mImageUris)) {
             Log.v(TAG, "image: " + menuImage.getImage().toString());
 
             if (menuImage.getImageSource() == MenuItemImage.SOURCE_SERVER) continue;
             try {
-                StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(getString(R.string.ref_storage_business_image));
-                final StorageReference imageStorageReference = storageReference.child(businessRefId + "_" + userId + "_" + new Date().getTime() + "_" + getFileNameFromUri((Uri) menuImage.getImage()));
+                StorageReference sRef = FirebaseStorage.getInstance().getReference().child(getString(R.string.sref_business_profile)).child(businessRefId);
+                final StorageReference imageSRef = sRef.child(businessRefId + "-" + user.getUserId() + "-" + new Date().getTime() + "-" + getFileNameFromUri((Uri) menuImage.getImage()));
 
                 ImageCompression compression = new ImageCompression(this, (Uri) menuImage.getImage());
                 File image = compression.compress();
 
-                UploadTask uploadTask = imageStorageReference.putFile(Uri.fromFile(image));
+                UploadTask uploadTask = imageSRef.putFile(Uri.fromFile(image));
                 uploadTask.addOnProgressListener(taskSnapshot -> {
                     // mLoadingPBar.setVisibility(View.VISIBLE);
                 }).continueWithTask(task -> {
                     if (!task.isSuccessful()) {
                         return null;
                     }
-                    return imageStorageReference.getDownloadUrl();
+                    return imageSRef.getDownloadUrl();
                 }).addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Uri downloadUri = task.getResult();

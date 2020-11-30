@@ -8,22 +8,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.crown.library.onspotlibrary.controller.OSPreferences;
 import com.crown.library.onspotlibrary.model.ListItem;
+import com.crown.library.onspotlibrary.model.business.BusinessOSB;
 import com.crown.library.onspotlibrary.model.user.UserOSB;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.library.onspotlibrary.utils.emun.OrderStatus;
 import com.crown.onspotbusiness.R;
+import com.crown.onspotbusiness.databinding.FragmentHomeBinding;
 import com.crown.onspotbusiness.utils.CurrentOrderHelper;
 import com.crown.onspotbusiness.view.ListItemAdapter;
 import com.google.android.material.tabs.TabLayout;
@@ -44,47 +43,21 @@ public class CurrentOrderFragment extends Fragment implements EventListener<Quer
 
     private List<ListItem> mDataset;
     private ListItemAdapter mAdapter;
-    private TextView mNoCurrentOrderMessage;
-    private TabLayout tabLayout;
-    private RecyclerView mRecyclerView;
+    private FragmentHomeBinding binding;
     private CurrentOrderHelper orderHelper;
     private ListenerRegistration mCurrentOrderChangeListener;
-    TabLayout.OnTabSelectedListener onTabSelectedListener = new TabLayout.OnTabSelectedListener() {
-        @Override
-        public void onTabSelected(TabLayout.Tab tab) {
-            CurrentOrderHelper.TabContainer currentTab = orderHelper.getTabContainers().get(tab.getPosition());
-            if (currentTab.listPosition != -1) {
-                mRecyclerView.smoothScrollToPosition(currentTab.listPosition);
-            }
-        }
-
-        @Override
-        public void onTabUnselected(TabLayout.Tab tab) {
-
-        }
-
-        @Override
-        public void onTabReselected(TabLayout.Tab tab) {
-
-        }
-    };
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        mNoCurrentOrderMessage = root.findViewById(R.id.tv_wtl_warning);
-        mNoCurrentOrderMessage.setText("You have no current order");
-
-        tabLayout = root.findViewById(R.id.tl_fh_tab);
-        Toolbar toolbar = root.findViewById(R.id.tbar_fm_tool_bar);
-        toolbar.setTitle("Current Order");
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
         setHasOptionsMenu(true);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        binding.toolbar.setTitle("Current order");
+        ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
 
         orderHelper = new CurrentOrderHelper(getContext().getApplicationContext());
         initTabLayout();
+        setUpRecycler();
         getOrder();
-        setUpRecycler(root);
-        return root;
+        return binding.getRoot();
     }
 
     @Override
@@ -102,6 +75,14 @@ public class CurrentOrderFragment extends Fragment implements EventListener<Quer
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        BusinessOSB b = OSPreferences.getInstance(getContext()).getObject(OSPreferenceKey.BUSINESS, BusinessOSB.class);
+        if (b != null && !b.getIsActive())
+            binding.inactiveBusinessInclude.inactiveBusinessOib.setVisibility(View.VISIBLE);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (mCurrentOrderChangeListener != null) mCurrentOrderChangeListener.remove();
@@ -114,17 +95,39 @@ public class CurrentOrderFragment extends Fragment implements EventListener<Quer
         } else {
             mDataset.clear();
             mAdapter.notifyDataSetChanged();
-            mNoCurrentOrderMessage.setVisibility(View.VISIBLE);
+            showInfoMsg("No order found");
         }
     }
 
     private void initTabLayout() {
         for (String tabLabel : orderHelper.getTabLabels()) {
-            TabLayout.Tab tab = tabLayout.newTab();
+            TabLayout.Tab tab = binding.tabBar.newTab();
             tab.setText(tabLabel);
-            tabLayout.addTab(tab);
+            binding.tabBar.addTab(tab);
         }
-        tabLayout.addOnTabSelectedListener(onTabSelectedListener);
+
+        binding.tabBar.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                CurrentOrderHelper.TabContainer currentTab = orderHelper.getTabContainers().get(tab.getPosition());
+                if (currentTab.listPosition != -1) {
+                    binding.listRv.post(() -> {
+                        float y = binding.listRv.getY() + binding.listRv.getChildAt(currentTab.listPosition).getY();
+                        binding.nestedScrollView.smoothScrollTo(0, (int) y);
+                    });
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 
     private void getOrder() {
@@ -136,21 +139,22 @@ public class CurrentOrderFragment extends Fragment implements EventListener<Quer
                 .addSnapshotListener(this);
     }
 
-    private void setUpRecycler(View root) {
-        mRecyclerView = root.findViewById(R.id.rv_fh_list);
-        mRecyclerView.setHasFixedSize(true);
-
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
-        mRecyclerView.setLayoutManager(mLayoutManager);
-
+    private void setUpRecycler() {
+        binding.listRv.setHasFixedSize(true);
+        binding.listRv.setLayoutManager(new LinearLayoutManager(getContext()));
         mDataset = new ArrayList<>();
         mAdapter = new ListItemAdapter(getContext(), mDataset);
-        mRecyclerView.setAdapter(mAdapter);
+        binding.listRv.setAdapter(mAdapter);
     }
 
     private void displayCurrentOrder(List<DocumentSnapshot> documents) {
         mDataset.clear();
         mDataset.addAll(orderHelper.getDataset(documents));
         mAdapter.notifyDataSetChanged();
+    }
+
+    private void showInfoMsg(String msg) {
+        binding.warningInclude.warningTv.setText(msg);
+        binding.warningInclude.warningTv.setVisibility(View.VISIBLE);
     }
 }

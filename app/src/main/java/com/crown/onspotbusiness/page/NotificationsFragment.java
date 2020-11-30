@@ -13,13 +13,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.crown.library.onspotlibrary.controller.OSPreferences;
 import com.crown.library.onspotlibrary.model.ListItem;
-import com.crown.library.onspotlibrary.model.notification.DeliveryPartnershipRequest;
+import com.crown.library.onspotlibrary.model.business.BusinessV6;
+import com.crown.library.onspotlibrary.model.notification.OSDeliveryPartnershipRequest;
 import com.crown.library.onspotlibrary.utils.ListItemType;
+import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
-import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.utils.preference.PreferenceKey;
-import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.crown.onspotbusiness.view.ListItemAdapter;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -34,6 +34,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+// todo: use view binding
 public class NotificationsFragment extends Fragment implements EventListener<QuerySnapshot> {
 
     @BindView(R.id.include_fn_info_no_activity)
@@ -80,9 +81,9 @@ public class NotificationsFragment extends Fragment implements EventListener<Que
     }
 
     private void getNotifications() {
-        String businessRefId = Preferences.getInstance(getActivity().getApplicationContext()).getObject(PreferenceKey.USER, User.class).getBusinessRefId();
+        BusinessV6 business = OSPreferences.getInstance(getContext().getApplicationContext()).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
         mNotificationsChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_notification))
-                .whereArrayContains(getString(R.string.field_account), "osb::" + businessRefId)
+                .whereArrayContains(getString(R.string.field_account), "osb::" + business.getBusinessRefId())
                 .addSnapshotListener(this);
     }
 
@@ -108,8 +109,8 @@ public class NotificationsFragment extends Fragment implements EventListener<Que
                 Long type = (Long) doc.get(getString(R.string.field_type));
                 if (type == null) continue;
 
-                if (type == ListItemType.DELIVERY_PARTNERSHIP_REQUEST) {
-                    DeliveryPartnershipRequest request = doc.toObject(DeliveryPartnershipRequest.class);
+                if (type == ListItemType.NOTI_DELIVERY_PARTNERSHIP_REQUEST) {
+                    OSDeliveryPartnershipRequest request = doc.toObject(OSDeliveryPartnershipRequest.class);
                     if (request == null) continue;
                     request.setId(doc.getId());
                     mDataset.add(request);

@@ -13,8 +13,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.crown.library.onspotlibrary.model.OSLocation;
 import com.crown.onspotbusiness.R;
-import com.crown.onspotbusiness.model.Location;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.GeoPoint;
@@ -31,7 +31,7 @@ public class CreateLocationDialog extends DialogFragment implements View.OnClick
     public static final String KEY_LOCATION = "LOCATION";
     private final int RC_INTENT_SELECT_LOCATION_FROM_MAP = 1;
 
-    private Location mSelectedLocation;
+    private OSLocation mSelectedLocation;
     private TextInputLayout addressTIL;
     private TextInputLayout howToReachTIL;
     private TextInputEditText addressTIET;
@@ -54,7 +54,7 @@ public class CreateLocationDialog extends DialogFragment implements View.OnClick
         if (argument != null) {
             String json = argument.getString(KEY_LOCATION, null);
             if (json != null) {
-                mSelectedLocation = new Gson().fromJson(json, Location.class);
+                mSelectedLocation = new Gson().fromJson(json, OSLocation.class);
                 setUpUi();
             }
         }
@@ -71,7 +71,7 @@ public class CreateLocationDialog extends DialogFragment implements View.OnClick
                 String address = data.getStringExtra(LOCATION_ADDRESS);
                 String postalCode = data.getStringExtra(ZIPCODE);
 
-                mSelectedLocation = new Location(address, new GeoPoint(latitude, longitude), postalCode, "");
+                mSelectedLocation = new OSLocation(address, new GeoPoint(latitude, longitude), postalCode, "");
                 setUpUi();
             }
         }
@@ -139,6 +139,6 @@ public class CreateLocationDialog extends DialogFragment implements View.OnClick
     }
 
     public interface OnLocationDialogActionClicked {
-        void onLocationDialogPositiveActionClicked(Location location);
+        void onLocationDialogPositiveActionClicked(OSLocation location);
     }
 }

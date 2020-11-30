@@ -4,9 +4,10 @@ import android.content.Context;
 
 import com.crown.library.onspotlibrary.controller.OSPreferences;
 import com.crown.library.onspotlibrary.model.ListItem;
-import com.crown.library.onspotlibrary.model.OSOrder;
 import com.crown.library.onspotlibrary.model.UnSupportedContent;
+import com.crown.library.onspotlibrary.model.order.OSOrder;
 import com.crown.library.onspotlibrary.model.user.UserOSB;
+import com.crown.library.onspotlibrary.utils.OSListUtils;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.library.onspotlibrary.utils.emun.OrderStatus;
 import com.crown.onspotbusiness.BuildConfig;
@@ -20,17 +21,15 @@ import java.util.List;
 
 public class CurrentOrderHelper {
 
-    private Context context;
-    private List<TabContainer> tabContainers = new ArrayList<>();
-    private String[] tabLabels = new String[]{"New", "Accepted", "Preparing", "Ready", "Out For Deliver"};
-    private OrderStatus[] tabStatus = new OrderStatus[]{OrderStatus.ORDERED, OrderStatus.ACCEPTED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.ON_THE_WAY};
-    private int length = tabLabels.length;
+    private final Context context;
+    private final String[] tabLabels = new String[]{"New", "Accepted", "Preparing", "Ready", "Out For Deliver"};
+    private final OrderStatus[] tabStatus = new OrderStatus[]{OrderStatus.ORDERED, OrderStatus.ACCEPTED, OrderStatus.PREPARING, OrderStatus.READY, OrderStatus.ON_THE_WAY};
+    private final int length = tabLabels.length;
+    private List<TabContainer> tabContainers;
 
     public CurrentOrderHelper(Context context) {
         this.context = context;
-        for (int i = 0; i < length; i++) {
-            tabContainers.add(new TabContainer(tabLabels[i], tabStatus[i]));
-        }
+        initTabContainers();
     }
 
     public String[] getTabLabels() {
@@ -38,12 +37,21 @@ public class CurrentOrderHelper {
     }
 
     public List<TabContainer> getTabContainers() {
+        if (OSListUtils.isEmpty(tabContainers)) initTabContainers();
         return tabContainers;
+    }
+
+    public void initTabContainers() {
+        tabContainers = new ArrayList<>();
+        for (int i = 0; i < length; i++) {
+            tabContainers.add(new TabContainer(tabLabels[i], tabStatus[i]));
+        }
     }
 
     public List<ListItem> getDataset(List<DocumentSnapshot> docs) {
         boolean hasUnSupportedItem = false;
         List<ListItem> finalOrderList = new ArrayList<>();
+        initTabContainers();
         List<List<ListItem>> distributedList = new ArrayList<>();
         UserOSB user = OSPreferences.getInstance(context).getObject(OSPreferenceKey.USER, UserOSB.class);
         UnSupportedContent unSupportedContent = new UnSupportedContent(BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME, user.getUserId(), CurrentOrderFragment.class.getName());
@@ -88,6 +96,10 @@ public class CurrentOrderHelper {
 
         int position = 0;
         for (int i = 0; i < distributedList.size(); i++) {
+            if (distributedList.get(i).isEmpty()) {
+                tabContainers.get(i).listPosition = -1;
+                continue;
+            }
             Collections.sort(distributedList.get(i), (o1, o2) -> (int) (((OSOrder) o2).getOrderedAt().getSeconds() - ((OSOrder) o1).getOrderedAt().getSeconds()));
             tabContainers.get(i).listPosition = position;
             position += tabContainers.get(i).count;

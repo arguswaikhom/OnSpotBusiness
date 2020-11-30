@@ -70,6 +70,31 @@
                 app:layout_constraintBottom_toBottomOf="@+id/image_iv"
                 app:layout_constraintStart_toStartOf="parent"
                 tools:rating="3" />
+
+            <FrameLayout
+                android:id="@+id/inactive_product_info_fl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/red_400"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:drawablePadding="4dp"
+                    android:gravity="center"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:text="Update required"
+                    android:textColor="@color/grey_5"
+                    app:drawableEndCompat="@drawable/ic_baseline_info_24"
+                    app:drawableTint="@color/grey_5" />
+            </FrameLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView

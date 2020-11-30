@@ -1,5 +1,6 @@
 package com.crown.onspotbusiness.model;
 
+@Deprecated
 public class OSBPreferences {
     public static int DETAILS = 1;
     public static int GRID = 2;

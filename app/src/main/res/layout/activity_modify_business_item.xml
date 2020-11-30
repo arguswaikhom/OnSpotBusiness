@@ -57,7 +57,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:digits=" .,ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
-                        android:inputType="textFilter"
+                        android:inputType="textCapSentences"
                         android:maxLength="30"
                         android:maxLines="1" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -75,7 +75,8 @@
                     <AutoCompleteTextView
                         android:id="@+id/categories_actv"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapSentences" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <LinearLayout
@@ -132,7 +133,7 @@
                         android:id="@+id/description_tiet"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textMultiLine"
+                        android:inputType="textMultiLine|textCapSentences"
                         android:maxLength="300" />
                 </com.google.android.material.textfield.TextInputLayout>
 

@@ -2,10 +2,10 @@ package com.crown.onspotbusiness.controller;
 
 import android.util.Log;
 
+import com.crown.library.onspotlibrary.controller.OSPreferences;
+import com.crown.library.onspotlibrary.model.business.BusinessV6;
+import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
-import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.utils.preference.PreferenceKey;
-import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.google.firebase.database.annotations.NotNull;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -28,18 +28,10 @@ public class FirebaseMessagingService extends com.google.firebase.messaging.Fire
     }
 
     private void sendDeviceToken(String token) {
-        Preferences preferences = Preferences.getInstance(getApplicationContext());
-        User user = preferences.getObject(PreferenceKey.USER, User.class);
-
-        if (user == null) return;
+        BusinessV6 business = OSPreferences.getInstance(getApplicationContext()).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
+        if (business == null) return;
         String field = getString(R.string.field_device_token);
-        FirebaseFirestore.getInstance().collection(getString(R.string.ref_business))
-                .document(user.getBusinessRefId())
-                .update(field, FieldValue.arrayUnion(token))
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        preferences.setObject(token, PreferenceKey.DEVICE_TOKEN);
-                    }
-                });
+        FirebaseFirestore.getInstance().collection(getString(R.string.ref_business)).document(business.getBusinessRefId())
+                .update(field, FieldValue.arrayUnion(token));
     }
 }

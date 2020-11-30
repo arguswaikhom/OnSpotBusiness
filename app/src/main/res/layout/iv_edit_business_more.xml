@@ -99,7 +99,7 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <Switch
+            <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/hod"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -117,11 +117,11 @@
                 android:layout_weight="1" />
 
             <ImageView
-                android:id="@+id/hod_info"
+                android:id="@+id/hod_info_iv"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="26dp"
                 android:src="@drawable/ic_baseline_info_24"
-                android:tint="@color/light_green_400" />
+                app:tint="@color/light_green_400" />
         </LinearLayout>
 
         <com.google.android.material.card.MaterialCardView
@@ -141,7 +141,7 @@
                 android:layout_margin="8dp"
                 android:padding="8dp">
 
-                <Switch
+                <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/free_shipping"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -185,14 +185,14 @@
                     tools:layout_editor_absoluteY="45dp">
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/min_order"
+                        android:id="@+id/min_order_til"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/min_order_value"
+                            android:id="@+id/min_order_tiet"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:digits="@string/digits_number_positive"
@@ -229,37 +229,5 @@
                     app:constraint_referenced_ids="shipping_charge,free_shipping,textView2" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/grey_10" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <CheckBox
-                android:id="@+id/passive_open"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Enable passive open"
-                android:textSize="@dimen/sp_sub1" />
-
-            <ImageView
-                android:id="@+id/passive_open_info"
-                android:layout_width="14dp"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_baseline_info_24"
-                android:tint="@color/light_green_400" />
-        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

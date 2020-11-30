@@ -22,6 +22,15 @@
         android:supportsRtl="true"
         android:theme="@style/Material">
         <activity
+            android:name=".page.DeliveryPartnersActivity"
+            android:theme="@style/Material.NoActionBar.Grey" />
+        <activity
+            android:name=".page.ArchivedProductsActivity"
+            android:theme="@style/Material.NoActionBar" />
+        <activity
+            android:name=".page.DeliveryChargeActivity"
+            android:theme="@style/Material.NoActionBar.GreyStatusBar" />
+        <activity
             android:name=".page.ShippingChargeActivity"
             android:theme="@style/DialogActivity.NoActionBar" />
         <activity
@@ -31,26 +40,12 @@
             android:name=".page.AllOrderActivity"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
-            android:name=".page.CreateBusinessActivity"
-            android:label="Create Business"
-            android:theme="@style/Material.NoActionBar.GreyStatusBar" />
-        <activity
             android:name=".page.ModifyBusinessActivity"
             android:label="Create Business"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
             android:name=".page.PhoneVerificationActivity"
             android:theme="@style/Material.NoActionBar" />
-        <activity
-            android:name=".page.SignInActivity"
-            android:theme="@style/Material.NoActionBar">
-            <!--<intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
-        </activity>
-
         <activity
             android:name=".page.SignInPage"
             android:theme="@style/Material.NoActionBar">

@@ -12,13 +12,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.crown.library.onspotlibrary.controller.OSGlideLoader;
-import com.crown.library.onspotlibrary.model.OSOrder;
 import com.crown.library.onspotlibrary.model.OSPrice;
 import com.crown.library.onspotlibrary.model.OrderStatusRecord;
 import com.crown.library.onspotlibrary.model.cart.OSCartLite;
+import com.crown.library.onspotlibrary.model.order.OSOrder;
 import com.crown.library.onspotlibrary.model.user.UserOrder;
 import com.crown.library.onspotlibrary.utils.BusinessItemUtils;
 import com.crown.library.onspotlibrary.utils.OSContactReacher;
@@ -29,7 +30,7 @@ import com.crown.library.onspotlibrary.utils.callback.OnStringResponse;
 import com.crown.library.onspotlibrary.utils.emun.OrderStatus;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.databinding.LiCurrentOrderBinding;
-import com.crown.onspotbusiness.model.StatusRecord;
+import com.crown.onspotbusiness.page.AssignDeliveryPartnerBottomSheetFragment;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -41,9 +42,9 @@ import java.util.Map;
 
 public class CurrentOrderVH extends RecyclerView.ViewHolder implements PopupMenu.OnMenuItemClickListener {
 
+    private final Context context;
+    private final LiCurrentOrderBinding binding;
     private OSOrder order;
-    private Context context;
-    private LiCurrentOrderBinding binding;
 
     public CurrentOrderVH(@NonNull View itemView) {
         super(itemView);
@@ -87,7 +88,7 @@ public class CurrentOrderVH extends RecyclerView.ViewHolder implements PopupMenu
         new AlertDialog.Builder(context).setTitle("Cancel Order").setMessage(Html.fromHtml("Are you sure you want to cancel this order from <b>" + order.getCustomer().getDisplayName() + "</b>?")).setPositiveButton("Yes", (dialog, which) -> {
             Map<String, Object> map = new HashMap<>();
             view.setEnabled(false);
-            map.put("status", StatusRecord.Status.CANCELED);
+            map.put("status", OrderStatus.CANCELED);
             map.put("statusRecord", FieldValue.arrayUnion(new OrderStatusRecord(OrderStatus.CANCELED, new Timestamp(new Date()))));
             update(map);
         }).setNegativeButton("No", null).show();
@@ -123,7 +124,8 @@ public class CurrentOrderVH extends RecyclerView.ViewHolder implements PopupMenu
     }
 
     private void assignDelivery() {
-
+        AssignDeliveryPartnerBottomSheetFragment fragment = AssignDeliveryPartnerBottomSheetFragment.newInstance(order.getOrderId());
+        fragment.show(((AppCompatActivity) context).getSupportFragmentManager(), fragment.getTag());
     }
 
     private void makeCall(String uid) {
@@ -149,8 +151,6 @@ public class CurrentOrderVH extends RecyclerView.ViewHolder implements PopupMenu
 
         if (!binding.negativeBtn.isEnabled()) binding.negativeBtn.setEnabled(true);
         if (!binding.positiveBtn.isEnabled()) binding.positiveBtn.setEnabled(true);
-
-        delivery = customer;
 
         int totalItems = 0;
         int finalPrice = 0;
@@ -182,7 +182,6 @@ public class CurrentOrderVH extends RecyclerView.ViewHolder implements PopupMenu
         binding.finalPriceTv.setText(String.format("%s %s", context.getString(R.string.inr), finalPrice));
         binding.positiveBtn.setText(order.getStatus().getButtonText());
 
-        // todo: implement real delivery
         if (delivery != null) {
             if (binding.deliveryLl.getVisibility() == View.GONE) {
                 binding.deliveryLl.setVisibility(View.VISIBLE);

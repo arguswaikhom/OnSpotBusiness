@@ -18,6 +18,10 @@
         android:title="Out of stock" />
 
     <item
+        android:id="@+id/action_mbic_share_product"
+        android:title="Share this product" />
+
+    <item
         android:id="@+id/action_mbic_archive"
-        android:title="Archive" />
+        android:title="Add to archive" />
 </menu>

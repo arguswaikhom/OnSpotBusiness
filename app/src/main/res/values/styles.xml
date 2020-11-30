@@ -5,6 +5,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
     </style>
 
     <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.ActionButton.Overflow">
@@ -21,6 +22,12 @@
     <style name="Material.NoActionBar.GreyStatusBar">
         <item name="android:statusBarColor">@color/grey_5</item>
         <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="Material.NoActionBar.Grey">
+        <item name="android:statusBarColor">@color/grey_5</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/grey_5</item>
     </style>
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -54,6 +61,7 @@
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
+    <!--@deprecated-->
     <style name="TextViewHeader">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -62,6 +70,7 @@
         <item name="android:textStyle">bold</item>
     </style>
 
+    <!--@deprecated-->
     <style name="CardViewStyle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -69,7 +78,6 @@
         <item name="cardCornerRadius">16dp</item>
         <item name="cardElevation">8dp</item>
     </style>
-
 
     <!-- START: Shipping charge dialog styles-->
     <style name="ShippingChargeLayout" />

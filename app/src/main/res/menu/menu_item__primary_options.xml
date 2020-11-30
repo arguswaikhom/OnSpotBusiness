@@ -5,12 +5,17 @@
     <item
         android:id="@+id/action_mio_swap"
         android:icon="@drawable/ic_baseline_grain_24"
-        android:title="Swap"
+        android:title="Change layout"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/nav_mio_add_item"
         android:icon="@drawable/ic_add_white_24dp"
-        android:title="Add item"
+        android:title="Add product"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/nav_mio_archived_products"
+        android:title="Archived products"
+        app:showAsAction="never" />
 </menu>

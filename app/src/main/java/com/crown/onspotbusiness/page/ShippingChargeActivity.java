@@ -16,14 +16,15 @@ import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class ShippingChargeActivity extends AppCompatActivity {
 
     public static final String DATA = "data";
     public static final String D_RANGE = "dRange";
     public static final String MAX_RANGE = "maxRange";
+    private final List<OSDeliveryCharge> list = new ArrayList<>();
     private double dRange;
     private ActivityShippingChargeBinding binding;
-    private List<OSDeliveryCharge> list = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
