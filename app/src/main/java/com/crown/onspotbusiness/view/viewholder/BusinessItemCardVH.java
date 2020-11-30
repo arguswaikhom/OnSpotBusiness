@@ -1,7 +1,9 @@
 package com.crown.onspotbusiness.view.viewholder;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.text.Html;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
@@ -11,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.crown.library.onspotlibrary.model.businessItem.BusinessItemOSB;
+import com.crown.library.onspotlibrary.utils.OSCommonIntents;
+import com.crown.library.onspotlibrary.utils.OSInAppUrlUtils;
 import com.crown.library.onspotlibrary.utils.OSMessage;
 import com.crown.library.onspotlibrary.utils.emun.BusinessItemStatus;
 import com.crown.onspotbusiness.R;
@@ -24,9 +28,9 @@ import java.util.Map;
 
 public class BusinessItemCardVH extends RecyclerView.ViewHolder {
 
-    private Context context;
+    private final Context context;
+    private final LiBusinessItemCardBinding binding;
     private BusinessItemOSB item;
-    private LiBusinessItemCardBinding binding;
 
     public BusinessItemCardVH(@NonNull View itemView) {
         super(itemView);
@@ -45,9 +49,7 @@ public class BusinessItemCardVH extends RecyclerView.ViewHolder {
     private boolean onClickedMenuItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_mbic_modify:
-                Intent intent = new Intent(context, ModifyBusinessItemActivity.class);
-                intent.putExtra(ModifyBusinessItemActivity.ITEM, new Gson().toJson(item));
-                context.startActivity(intent);
+                onClickedModifyProduct();
                 return true;
             case R.id.action_mbic_available:
                 updateAvailability(BusinessItemStatus.AVAILABLE);
@@ -65,8 +67,17 @@ public class BusinessItemCardVH extends RecyclerView.ViewHolder {
                         .document(item.getItemId()).update(map)
                         .addOnFailureListener(error -> OSMessage.showSToast(context, "Failed!!"));
                 return true;
+            case R.id.action_mbic_share_product:
+                OSCommonIntents.onIntentShareText(context, OSInAppUrlUtils.getProductUrl(item.getItemId()));
+                return true;
         }
         return false;
+    }
+
+    private void onClickedModifyProduct() {
+        Intent intent = new Intent(context, ModifyBusinessItemActivity.class);
+        intent.putExtra(ModifyBusinessItemActivity.ITEM, new Gson().toJson(item));
+        context.startActivity(intent);
     }
 
     public void bind(BusinessItemOSB item) {
@@ -74,7 +85,7 @@ public class BusinessItemCardVH extends RecyclerView.ViewHolder {
         String image = item.getImageUrls() != null && !item.getImageUrls().isEmpty() ? item.getImageUrls().get(0) : null;
         Glide.with(context).load(image).into(binding.imageIv);
         binding.nameTv.setText(item.getItemName());
-        binding.ratingBar.setRating(item.getRating() == null || item.getRating().getAverage() == null ? 0f : (float) (double) item.getRating().getAverage());
+        binding.ratingBar.setRating(item.getProductRating() == null || item.getProductRating().getAverage() == null ? 0f : (float) (double) item.getProductRating().getAverage());
         if (item.getStatus() == null || item.getStatus() == BusinessItemStatus.AVAILABLE) {
             binding.statusTv.setBackgroundResource(R.color.item_status_available);
             binding.statusTv.setText(BusinessItemStatus.AVAILABLE.getName());
@@ -86,6 +97,14 @@ public class BusinessItemCardVH extends RecyclerView.ViewHolder {
             binding.statusTv.setText(item.getStatus().getName());
         }
 
+        if (!item.getIsActive()) {
+            binding.inactiveProductInfoFl.setVisibility(View.VISIBLE);
+            binding.inactiveProductInfoFl.setOnClickListener(v -> new AlertDialog.Builder(context).setTitle("Inactive product")
+                    .setMessage(Html.fromHtml(context.getString(R.string.msg_info_inactive_product)))
+                    .setNegativeButton(context.getString(R.string.action_btn_cancel), null)
+                    .setPositiveButton("Update", (dialog, which) -> onClickedModifyProduct()).show());
+        } else if (binding.inactiveProductInfoFl.getVisibility() != View.GONE)
+            binding.inactiveProductInfoFl.setVisibility(View.GONE);
     }
 
     private void updateAvailability(BusinessItemStatus state) {

@@ -12,11 +12,11 @@ import java.util.Map;
 
 public class HttpVolleyRequest {
     private final String TAG = HttpVolleyRequest.class.getSimpleName();
-    private int mMethod;
-    private int mRequest;
-    private String mUrl;
-    private String mTag;
-    private OnHttpResponse mOnHttpResponse;
+    private final int mMethod;
+    private final int mRequest;
+    private final String mUrl;
+    private final String mTag;
+    private final OnHttpResponse mOnHttpResponse;
     private Map<String, String> mHttpHeader = null;
     private Map<String, String> mHttpParam = null;
 

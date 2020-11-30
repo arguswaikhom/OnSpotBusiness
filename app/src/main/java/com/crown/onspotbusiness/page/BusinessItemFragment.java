@@ -19,15 +19,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.crown.library.onspotlibrary.controller.OSPreferences;
 import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.library.onspotlibrary.model.UnSupportedContent;
+import com.crown.library.onspotlibrary.model.business.BusinessOSB;
+import com.crown.library.onspotlibrary.model.business.BusinessV6;
 import com.crown.library.onspotlibrary.model.businessItem.BusinessItemCard;
 import com.crown.library.onspotlibrary.model.businessItem.BusinessItemOSB;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.databinding.FragmentMenuBinding;
 import com.crown.onspotbusiness.model.OSBPreferences;
-import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.utils.preference.PreferenceKey;
-import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.crown.onspotbusiness.view.ListItemAdapter;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -37,6 +37,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BusinessItemFragment extends Fragment implements EventListener<QuerySnapshot> {
@@ -61,12 +62,12 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentMenuBinding.inflate(inflater, container, false);
 
-        binding.warningInclude.tvWtlWarning.setText("Create item to see here");
+        binding.warningInclude.warningTv.setText("Create item to see here");
         binding.toolbar.setTitle("Item");
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
         archivedDocs = new ArrayList<>();
-        preferences = OSPreferences.getInstance(getContext()).getObject(OSPreferenceKey.SHARED_PREFERENCES, OSBPreferences.class);
+        preferences = OSPreferences.getInstance(getContext()).getObject(OSPreferenceKey.APP_PREFERENCES, OSBPreferences.class);
 
         binding.listRv.setHasFixedSize(true);
         setUpRecycler();
@@ -88,9 +89,11 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
     @Override
     public void onStart() {
         super.onStart();
-        // todo: get archived == false
-        String businessREfId = Preferences.getInstance(getActivity().getApplicationContext()).getObject(PreferenceKey.USER, User.class).getBusinessRefId();
-        mMenuItemChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_item)).whereEqualTo("businessRefId", businessREfId).addSnapshotListener(this);
+        BusinessV6 business = OSPreferences.getInstance(getContext().getApplicationContext()).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
+        mMenuItemChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_item))
+                .whereEqualTo(getString(R.string.field_business_ref_id), business.getBusinessRefId())
+                .whereEqualTo(OSString.fieldArchived, false)
+                .addSnapshotListener(this);
     }
 
     @Override
@@ -102,6 +105,9 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
     @Override
     public boolean onOptionsItemSelected(@NonNull android.view.MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.nav_mio_archived_products:
+                startActivity(new Intent(getContext(), ArchivedProductsActivity.class));
+                break;
             case R.id.nav_mio_add_item:
                 Intent intent = new Intent(getContext(), ModifyBusinessItemActivity.class);
                 startActivity(intent);
@@ -115,7 +121,7 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
                 } else {
                     preferences.setBussItemView(OSBPreferences.DETAILS);
                 }
-                OSPreferences.getInstance(getContext()).setObject(preferences, OSPreferenceKey.SHARED_PREFERENCES);
+                OSPreferences.getInstance(getContext()).setObject(preferences, OSPreferenceKey.APP_PREFERENCES);
                 setUpRecycler();
                 updateItemList(archivedDocs);
                 break;
@@ -124,9 +130,18 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        BusinessOSB b = OSPreferences.getInstance(getContext()).getObject(OSPreferenceKey.BUSINESS, BusinessOSB.class);
+        if (b != null && !b.getIsActive()) {
+            binding.inactiveBusinessInclude.inactiveBusinessOib.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
-        mMenuItemChangeListener.remove();
+        if (mMenuItemChangeListener != null) mMenuItemChangeListener.remove();
     }
 
     @Override
@@ -136,7 +151,7 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
             updateItemList(snapshots.getDocuments());
             archivedDocs = snapshots.getDocuments();
         } else {
-            binding.warningInclude.tvWtlWarning.setVisibility(View.VISIBLE);
+            binding.warningInclude.warningTv.setVisibility(View.VISIBLE);
         }
     }
 
@@ -164,10 +179,15 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
             }
         }
         if (hasUnSupportedItem) mDataset.add(unSupportedContent);
-
-        // Collections.sort(mDataset, (o1, o2) -> ((MenuItem) o1).getItemName().compareTo(((MenuItem) o2).getItemName()));
-        if (mDataset.size() <= 0) binding.warningInclude.tvWtlWarning.setVisibility(View.VISIBLE);
-        else binding.warningInclude.tvWtlWarning.setVisibility(View.GONE);
+        Collections.sort(mDataset, (o1, o2) -> {
+            try {
+                return ((BusinessItemOSB) o1).getItemName().compareToIgnoreCase(((BusinessItemOSB) o2).getItemName());
+            } catch (Exception ignore) {
+            }
+            return 0;
+        });
+        if (mDataset.size() <= 0) binding.warningInclude.warningTv.setVisibility(View.VISIBLE);
+        else binding.warningInclude.warningTv.setVisibility(View.GONE);
         mAdapter.notifyDataSetChanged();
     }
 }

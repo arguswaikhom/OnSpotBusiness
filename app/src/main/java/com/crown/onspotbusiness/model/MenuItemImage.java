@@ -10,7 +10,7 @@ public class MenuItemImage extends ListItem {
     public static final int SOURCE_DEVICE = 1;
     public static final int SOURCE_SERVER = 2;
 
-    private Object image;
+    private final Object image;
     private int imageSource;
 
     public MenuItemImage(Object image) {

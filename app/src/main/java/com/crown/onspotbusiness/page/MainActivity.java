@@ -1,7 +1,7 @@
 package com.crown.onspotbusiness.page;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -9,14 +9,11 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.NavigationUI;
 
 import com.crown.library.onspotlibrary.controller.OSPreferences;
+import com.crown.library.onspotlibrary.model.business.BusinessOSB;
 import com.crown.library.onspotlibrary.model.business.BusinessV6;
 import com.crown.library.onspotlibrary.model.user.UserOSB;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
-import com.crown.onspotbusiness.model.Business;
-import com.crown.onspotbusiness.model.User;
-import com.crown.onspotbusiness.utils.preference.PreferenceKey;
-import com.crown.onspotbusiness.utils.preference.Preferences;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -42,63 +39,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void syncAccountInfo() {
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         UserOSB user = OSPreferences.getInstance(getApplicationContext()).getObject(OSPreferenceKey.USER, UserOSB.class);
-        mUserChangeListener = firestore.collection(getString(R.string.ref_user)).document(user.getUserId()).addSnapshotListener((documentSnapshot, e) -> {
+        mUserChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_user)).document(user.getUserId()).addSnapshotListener((documentSnapshot, e) -> {
             if (documentSnapshot != null && documentSnapshot.exists()) {
-                User updatedUser = documentSnapshot.toObject(User.class);
-                Log.v(TAG, "User: " + updatedUser);
-
+                UserOSB updatedUser = documentSnapshot.toObject(UserOSB.class);
                 if (updatedUser != null) {
-                    Preferences preferences = Preferences.getInstance(getApplicationContext());
-                    preferences.setObject(updatedUser, PreferenceKey.USER);
+                    OSPreferences.getInstance(getApplicationContext()).setObject(updatedUser, OSPreferenceKey.USER);
+                    sendBroadcast(new Intent(getString(R.string.action_osb_changes)));
                 }
             }
         });
-        mBusinessChangeListener = firestore.collection(getString(R.string.ref_business)).document(user.getBusinessRefId()).addSnapshotListener(((documentSnapshot, e) -> {
+        mBusinessChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_business)).document(user.getBusinessRefId()).addSnapshotListener(((documentSnapshot, e) -> {
             if (documentSnapshot != null && documentSnapshot.exists()) {
-                Business business = documentSnapshot.toObject(Business.class);
-                Log.v(TAG, "Business: " + business);
-                if (business != null) {
-                    Preferences.getInstance(getApplicationContext()).setObject(business, PreferenceKey.BUSINESS);
-                }
-
-                BusinessV6 osb = documentSnapshot.toObject(BusinessV6.class);
-                Log.d("debug", osb.toString());
+                BusinessOSB osb = documentSnapshot.toObject(BusinessOSB.class);
                 if (osb != null) {
                     OSPreferences.getInstance(getApplicationContext()).setObject(osb, OSPreferenceKey.BUSINESS);
+                    sendBroadcast(new Intent(getString(R.string.action_osb_business_changes)));
                 }
             }
         }));
 
-        String token = Preferences.getInstance(getApplicationContext()).getObject(PreferenceKey.DEVICE_TOKEN, String.class);
-        Log.v(TAG, "Token state: " + token);
-        if (token == null) {
-            Log.v(TAG, "Getting token");
-            FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(task -> {
-                Log.v(TAG, "" + task.isSuccessful());
-
-                if (task.isSuccessful()) {
-                    Log.v(TAG, "Token: " + task.getResult().getToken());
-                    sendDeviceToken(task.getResult().getToken());
-                }
-            }).addOnFailureListener(error -> Log.v(TAG, "#####\n" + error + "\n#####"));
-        }
-    }
-
-    private void sendDeviceToken(String token) {
-        OSPreferences preferences = OSPreferences.getInstance(getApplicationContext());
-        UserOSB user = preferences.getObject(OSPreferenceKey.USER, UserOSB.class);
-
-        String field = getString(R.string.field_device_token);
-        FirebaseFirestore.getInstance().collection(getString(R.string.ref_business))
-                .document(user.getBusinessRefId())
-                .update(field, FieldValue.arrayUnion(token))
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        preferences.setObject(token, OSPreferenceKey.DEVICE_TOKEN_OSB);
-                    }
-                });
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(result -> {
+            BusinessV6 business = OSPreferences.getInstance(getApplicationContext()).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
+            if (business == null || business.getDeviceToken() == null || business.getDeviceToken().isEmpty() || !business.getDeviceToken().contains(result.getToken())) {
+                FirebaseFirestore.getInstance().collection(getString(R.string.ref_business)).document(user.getBusinessRefId()).update(getString(R.string.field_device_token), FieldValue.arrayUnion(result.getToken()));
+            }
+        });
     }
 
     @Override

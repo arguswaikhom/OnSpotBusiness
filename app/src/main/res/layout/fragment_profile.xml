@@ -5,14 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_cart_6"
-    tools:context=".page.ProfileFragment">
+    tools:context=".page.ProfileFragment"
+    tools:ignore="ContentDescription">
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:scaleType="centerCrop"
         android:src="@drawable/world_map"
-        android:tint="@android:color/white" />
+        app:tint="@android:color/white" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nested_scroll_view"
@@ -43,7 +44,7 @@
                 android:padding="@dimen/spacing_mxlarge">
 
                 <ImageView
-                    android:id="@+id/iv_fp_profile_image"
+                    android:id="@+id/profile_image_iv"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_gravity="center"
@@ -61,7 +62,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tv_fp_display_name"
+                        android:id="@+id/user_name_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
@@ -70,7 +71,7 @@
                         tools:text="Kevin John" />
 
                     <TextView
-                        android:id="@+id/tv_fp_email"
+                        android:id="@+id/email_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_medium"
@@ -88,7 +89,7 @@
                 android:padding="@dimen/spacing_middle">
 
                 <LinearLayout
-                    android:id="@+id/mcv_fp_business"
+                    android:id="@+id/my_business_ll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
@@ -114,14 +115,14 @@
                         android:layout_height="wrap_content" />
 
                     <FrameLayout
-                        android:id="@+id/fl_sp_open_or_close_switch_layout"
+                        android:id="@+id/open_close_business_fl"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:clickable="true"
                         android:focusable="true">
 
-                        <Switch
-                            android:id="@+id/switch_ap_open_or_close"
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/open_close_business_switch"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:clickable="false" />
@@ -137,93 +138,48 @@
                 </LinearLayout>
 
                 <View
+                    android:id="@+id/vertical_divider_v"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginLeft="@dimen/spacing_large"
-                    android:layout_marginRight="@dimen/spacing_large"
-                    android:background="@color/grey_10" />
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@color/text_hint" />
 
-                <LinearLayout
-                    android:id="@+id/ll_fp_share"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:minHeight="70dp"
-                    android:orientation="horizontal"
-                    android:paddingLeft="@dimen/spacing_large"
-                    android:paddingRight="@dimen/spacing_large">
+                <com.crown.library.onspotlibrary.views.OSProfileItem
+                    android:id="@+id/delivery_partners_opi"
+                    style="@style/ProfileMenuStyle"
+                    app:icon="@drawable/ic_delivery_24dp"
+                    app:title="@string/title_delivery_partners" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:fontFamily="sans-serif-light"
-                        android:text="Share"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/grey_5" />
+                <com.crown.library.onspotlibrary.views.OSProfileItem
+                    android:id="@+id/edit_profile_opi"
+                    style="@style/ProfileMenuStyle"
+                    app:icon="@drawable/ic_round_edit_24"
+                    app:title="@string/title_edit_profile" />
 
-                    <View
-                        android:layout_width="@dimen/spacing_large"
-                        android:layout_height="wrap_content" />
+                <com.crown.library.onspotlibrary.views.OSProfileItem
+                    android:id="@+id/contact_us_opi"
+                    style="@style/ProfileMenuStyle"
+                    app:icon="@drawable/ic_round_contact_support_24"
+                    app:title="@string/title_contact_us" />
 
-                    <ImageButton
-                        android:layout_width="@dimen/spacing_xmlarge"
-                        android:layout_height="@dimen/spacing_xmlarge"
-                        android:background="@android:color/transparent"
-                        android:tint="@color/grey_5"
-                        app:srcCompat="@drawable/ic_baseline_share_24" />
-                </LinearLayout>
+                <com.crown.library.onspotlibrary.views.OSProfileItem
+                    android:id="@+id/share_opi"
+                    style="@style/ProfileMenuStyle"
+                    app:icon="@drawable/ic_baseline_share_24"
+                    app:title="@string/title_share" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginLeft="@dimen/spacing_large"
-                    android:layout_marginRight="@dimen/spacing_large"
-                    android:background="@color/grey_10" />
+                <com.crown.library.onspotlibrary.views.OSProfileItem
+                    android:id="@+id/rate_this_app_opi"
+                    style="@style/ProfileMenuStyle"
+                    app:icon="@drawable/ic_round_favorite_24"
+                    app:title="@string/title_rate_app" />
 
-                <LinearLayout
-                    android:id="@+id/ll_fp_logout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:minHeight="70dp"
-                    android:orientation="horizontal"
-                    android:paddingLeft="@dimen/spacing_large"
-                    android:paddingRight="@dimen/spacing_large">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:fontFamily="sans-serif-light"
-                        android:text="Logout"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                        android:textColor="@color/grey_5" />
-
-                    <View
-                        android:layout_width="@dimen/spacing_large"
-                        android:layout_height="wrap_content" />
-
-                    <ImageButton
-                        android:layout_width="@dimen/spacing_xmlarge"
-                        android:layout_height="@dimen/spacing_xmlarge"
-                        android:background="@android:color/transparent"
-                        android:tint="@color/grey_5"
-                        app:srcCompat="@android:drawable/ic_lock_power_off" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginLeft="@dimen/spacing_large"
-                    android:layout_marginRight="@dimen/spacing_large"
-                    android:background="@color/grey_10" />
+                <com.crown.library.onspotlibrary.views.OSProfileItem
+                    android:id="@+id/logout_opi"
+                    style="@style/ProfileMenuStyle"
+                    app:icon="@android:drawable/ic_lock_power_off"
+                    app:title="@string/title_logout" />
             </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

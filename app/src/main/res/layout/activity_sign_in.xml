@@ -5,9 +5,8 @@
     android:id="@+id/iasiwg_root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/login_gradient_animation_list"
     android:fitsSystemWindows="true"
-    tools:context=".page.SignInActivity">
+    tools:context=".page.SignInPage">
 
     <TextView
         android:layout_width="wrap_content"
@@ -19,7 +18,6 @@
         android:gravity="center"
         android:padding="16dp"
         android:text="OnSpot Business"
-        android:textColor="@android:color/white"
         android:textSize="60sp"
         tools:ignore="HardcodedText" />
 

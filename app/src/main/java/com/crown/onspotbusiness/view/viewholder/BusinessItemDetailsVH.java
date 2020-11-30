@@ -1,8 +1,10 @@
 package com.crown.onspotbusiness.view.viewholder;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,7 +24,10 @@ import com.bumptech.glide.request.RequestOptions;
 import com.crown.library.onspotlibrary.model.OSPrice;
 import com.crown.library.onspotlibrary.model.businessItem.BusinessItemOSB;
 import com.crown.library.onspotlibrary.utils.BusinessItemUtils;
+import com.crown.library.onspotlibrary.utils.OSCommonIntents;
+import com.crown.library.onspotlibrary.utils.OSInAppUrlUtils;
 import com.crown.library.onspotlibrary.utils.OSMessage;
+import com.crown.library.onspotlibrary.utils.OSRatingUtils;
 import com.crown.library.onspotlibrary.utils.emun.BusinessItemStatus;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.databinding.LiBusinessItemDetailsBinding;
@@ -36,9 +41,9 @@ import java.util.Locale;
 import java.util.Map;
 
 public class BusinessItemDetailsVH extends RecyclerView.ViewHolder {
-    private Context context;
+    private final Context context;
+    private final LiBusinessItemDetailsBinding binding;
     private BusinessItemOSB item;
-    private LiBusinessItemDetailsBinding binding;
 
     public BusinessItemDetailsVH(@NonNull View itemView) {
         super(itemView);
@@ -72,13 +77,22 @@ public class BusinessItemDetailsVH extends RecyclerView.ViewHolder {
             binding.statusBtn.setText(item.getStatus().getName());
         }
 
-        if (item.getRating() != null) {
-            binding.ratingBar.setRating(item.getRating().getAverage() == null ? 0f : (float) (double) item.getRating().getAverage());
-            binding.ratingCount.setText(item.getRating().getCount() == null ? "" : "(" + (float) (double) item.getRating().getCount() + ")");
-        }
+        OSRatingUtils.getReviewInfo(item.getProductRating(), (average, review) -> {
+            binding.ratingBar.setRating(Float.parseFloat(average));
+            binding.ratingCount.setText(review);
+        });
 
         String image = item.getImageUrls() != null && !item.getImageUrls().isEmpty() ? item.getImageUrls().get(0) : null;
         Glide.with(context).load(image).apply(new RequestOptions().transform(new CenterCrop(), new RoundedCorners(16))).into(binding.imageIv);
+
+        if (!item.getIsActive()) {
+            binding.inactiveProductInfoFl.setVisibility(View.VISIBLE);
+            binding.inactiveProductInfoFl.setOnClickListener(v -> new AlertDialog.Builder(context).setTitle("Inactive product")
+                    .setMessage(Html.fromHtml(context.getString(R.string.msg_info_inactive_product)))
+                    .setNegativeButton(context.getString(R.string.action_btn_cancel), null)
+                    .setPositiveButton("Update", (dialog, which) -> onClickedModifyProduct()).show());
+        } else if (binding.inactiveProductInfoFl.getVisibility() != View.GONE)
+            binding.inactiveProductInfoFl.setVisibility(View.GONE);
     }
 
     private View getPriceView(String label, String value) {
@@ -120,9 +134,7 @@ public class BusinessItemDetailsVH extends RecyclerView.ViewHolder {
     private boolean onClickedMenuItem(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.nav_mbic_modify:
-                Intent intent = new Intent(context, ModifyBusinessItemActivity.class);
-                intent.putExtra(ModifyBusinessItemActivity.ITEM, new Gson().toJson(item));
-                context.startActivity(intent);
+                onClickedModifyProduct();
                 return true;
             case R.id.action_mbic_available:
                 updateAvailability(BusinessItemStatus.AVAILABLE);
@@ -140,8 +152,17 @@ public class BusinessItemDetailsVH extends RecyclerView.ViewHolder {
                         .document(item.getItemId()).update(map)
                         .addOnFailureListener(error -> OSMessage.showSToast(context, "Failed!!"));
                 return true;
+            case R.id.action_mbic_share_product:
+                OSCommonIntents.onIntentShareText(context, OSInAppUrlUtils.getProductUrl(item.getItemId()));
+                return true;
         }
         return false;
+    }
+
+    private void onClickedModifyProduct() {
+        Intent intent = new Intent(context, ModifyBusinessItemActivity.class);
+        intent.putExtra(ModifyBusinessItemActivity.ITEM, new Gson().toJson(item));
+        context.startActivity(intent);
     }
 
     private void updateAvailability(BusinessItemStatus state) {

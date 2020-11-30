@@ -27,7 +27,6 @@
             android:layout_marginStart="@dimen/primary_margin"
             android:layout_marginTop="@dimen/primary_margin"
             android:layout_marginEnd="@dimen/primary_margin"
-            android:layout_marginBottom="@dimen/primary_margin"
             android:hint="Display name *"
             app:counterEnabled="true"
             app:counterMaxLength="40">
@@ -37,33 +36,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:digits=" .,ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
-                android:inputType="textFilter"
+                android:inputType="textCapSentences"
                 android:maxLength="40"
-                android:maxLines="1" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/id_til"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/primary_margin"
-            android:layout_marginTop="@dimen/primary_margin"
-            android:layout_marginEnd="@dimen/primary_margin"
-            android:layout_marginBottom="@dimen/primary_margin"
-            android:hint="Business ID *"
-            app:counterEnabled="true"
-            app:counterMaxLength="30"
-            app:helperText="Create a unique id of the business."
-            app:helperTextEnabled="true">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/id_tiet"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:digits="abcdefghijklmnopqrstuvwxyz1234567890"
-                android:inputType="textFilter"
-                android:maxLength="30"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -81,8 +55,8 @@
             <AutoCompleteTextView
                 android:id="@+id/type_actv"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
+                android:layout_height="wrap_content"
+                android:inputType="none" />
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

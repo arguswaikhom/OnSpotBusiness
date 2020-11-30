@@ -26,6 +26,8 @@
     <dimen name="spacing_mxlarge">25dp</dimen>
     <dimen name="spacing_xxxlarge">55dp</dimen>
     <dimen name="spacing_smlarge">18dp</dimen>
+    <dimen name="list_item_spacing">16dp</dimen>
+    <dimen name="list_item_spacing_half">8dp</dimen>
 
     <!---->
 </resources>
