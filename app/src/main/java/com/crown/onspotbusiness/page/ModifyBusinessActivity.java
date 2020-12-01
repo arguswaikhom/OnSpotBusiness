@@ -34,11 +34,11 @@ import com.crown.library.onspotlibrary.controller.OSViewAnimation;
 import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.library.onspotlibrary.model.OSLocation;
 import com.crown.library.onspotlibrary.model.OSShippingCharge;
-import com.crown.library.onspotlibrary.model.OSTime;
 import com.crown.library.onspotlibrary.model.business.BusinessV6;
 import com.crown.library.onspotlibrary.model.user.UserOSB;
 import com.crown.library.onspotlibrary.utils.OSImagePicker;
 import com.crown.library.onspotlibrary.utils.OSMessage;
+import com.crown.library.onspotlibrary.utils.OSTimeUtils;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.library.onspotlibrary.views.LoadingBounceDialog;
 import com.crown.library.onspotlibrary.views.OSCreateLocationDialog;
@@ -80,6 +80,14 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     boolean mVerifiedNo = false;
     private ListItemAdapter mAdapter;
     private List<ListItem> mImageUris;
+    private BusinessV6 mOBuss;
+    private IvEditBusinessInfoBinding infoV;
+    private IvEditBusinessContactBinding contactV;
+    private IvEditBusinessMoreBinding moreV;
+    private ActivityCreateShopBinding binding;
+
+    private UserOSB mCurrentUser;
+    private BusinessV6 mMBuss = new BusinessV6();
     private final TextWatcher mOnTextChanges = new TextWatcher() {
         @Override
         @SuppressWarnings("ConstantConditions")
@@ -104,20 +112,20 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
             try {
                 if (code == infoV.nameTiet.getText().hashCode()) {
-                    mModifiedBusiness.setDisplayName(value);
+                    mMBuss.setDisplayName(value);
                 } else if (code == infoV.typeActv.getText().hashCode()) {
-                    mModifiedBusiness.setBusinessType(value);
+                    mMBuss.setBusinessType(value);
                 } else if (code == contactV.mobileNoTiet.getText().hashCode()) {
-                    mModifiedBusiness.setMobileNumber(value);
-                    mVerifiedNo = value.equals(mOriginalBusiness.getMobileNumber());
+                    mMBuss.setMobileNumber(value);
+                    mVerifiedNo = value.equals(mOBuss.getMobileNumber());
                 } else if (code == contactV.emailTiet.getText().hashCode()) {
-                    mModifiedBusiness.setEmail(value);
+                    mMBuss.setEmail(value);
                 } else if (code == contactV.websiteTiet.getText().hashCode()) {
-                    mModifiedBusiness.setWebsite(value);
+                    mMBuss.setWebsite(value);
                 } else if (code == moreV.minOrderTiet.getText().hashCode()) {
-                    mModifiedBusiness.setMinOrder(Long.parseLong(value));
+                    mMBuss.setMinOrder(Long.parseLong(value));
                 } else if (code == moreV.deliveryRangeValue.getText().hashCode()) {
-                    mModifiedBusiness.setDeliveryRange(Long.valueOf(value));
+                    mMBuss.setDeliveryRange(Long.valueOf(value));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -129,14 +137,6 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
         }
     };
-    private IvEditBusinessInfoBinding infoV;
-    private IvEditBusinessContactBinding contactV;
-    private IvEditBusinessMoreBinding moreV;
-    private ActivityCreateShopBinding binding;
-
-    private UserOSB mCurrentUser;
-    private BusinessV6 mOriginalBusiness;
-    private BusinessV6 mModifiedBusiness = new BusinessV6();
     private LoadingBounceDialog loadingDialog;
     private HashSet<String> mSelectedOpeningDays = new HashSet<>();
 
@@ -154,12 +154,12 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
         OSPreferences preferences = OSPreferences.getInstance(this.getApplicationContext());
         mCurrentUser = preferences.getObject(OSPreferenceKey.USER, UserOSB.class);
-        mOriginalBusiness = preferences.getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
+        mOBuss = preferences.getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
 
-        if (mOriginalBusiness != null) {
+        if (mOBuss != null) {
             getSupportActionBar().setTitle("Edit Business");
-            mModifiedBusiness = preferences.getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
-            if (mModifiedBusiness.getMobileNumber() != null) mVerifiedNo = true;
+            mMBuss = preferences.getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
+            if (mMBuss.getMobileNumber() != null) mVerifiedNo = true;
             setUpUiFromBusiness();
         } else if (mCurrentUser != null) {
             setUpUiFromUser();
@@ -170,9 +170,9 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     void onClickedSelectOpeningTime(View view) {
         Calendar calendar = Calendar.getInstance();
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-            OSTime ot = new OSTime(selectedHour, selectedMinute, selectedHour > 12 ? OSTime.PM : OSTime.AM);
-            mModifiedBusiness.setOpeningTime(ot);
-            moreV.openingTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", ot.getHour(), ot.getMinute(), ot.getZone()));
+            String opensAt = selectedHour + ":" + selectedMinute;
+            mMBuss.setOpensAt(opensAt);
+            OSTimeUtils.extractTime(opensAt, (hr, min, zone) -> moreV.openingTimeTV.setText(String.format(Locale.ENGLISH, "%s:%s %s", hr, min, zone)));
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
 
         TextView titleTV = new TextView(this);
@@ -190,9 +190,9 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     void onClickedSelectClosingTime(View view) {
         Calendar calendar = Calendar.getInstance();
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, (timePicker, selectedHour, selectedMinute) -> {
-            OSTime ct = new OSTime(selectedHour, selectedMinute, selectedHour > 12 ? OSTime.PM : OSTime.AM);
-            mModifiedBusiness.setClosingTime(ct);
-            moreV.closingTimeTv.setText(String.format(Locale.ENGLISH, "%d:%d %s", ct.getHour(), ct.getMinute(), ct.getZone()));
+            String closesAt = selectedHour + ":" + selectedMinute;
+            mMBuss.setClosesAt(closesAt);
+            OSTimeUtils.extractTime(closesAt, (hr, min, zone) -> moreV.closingTimeTv.setText(String.format(Locale.ENGLISH, "%s:%s %s", hr, min, zone)));
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false);
 
         TextView titleTV = new TextView(this);
@@ -221,19 +221,19 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             else newSet.remove(weekDays[which]);
         }).setPositiveButton("OK", (dialog, which) -> {
             mSelectedOpeningDays = newSet;
-            mModifiedBusiness.setOpeningDays(new WeekDayHelper().getWeekDaysCode(new ArrayList<>(newSet).toArray(new String[0])));
+            mMBuss.setOpeningDays(new WeekDayHelper().getWeekDaysCode(new ArrayList<>(newSet).toArray(new String[0])));
         }).setNegativeButton("Cancel", null).create().show();
     }
 
     void onCheckedHod(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
             OSViewAnimation.expand(moreV.hodContent);
-            if (mModifiedBusiness.getMinOrder() != null)
-                moreV.minOrderTiet.setText(String.valueOf(mModifiedBusiness.getMinOrder()));
-            if (mModifiedBusiness.getDeliveryRange() != null)
-                moreV.deliveryRangeValue.setText(String.valueOf(mModifiedBusiness.getDeliveryRange()));
+            if (mMBuss.getMinOrder() != null)
+                moreV.minOrderTiet.setText(String.valueOf(mMBuss.getMinOrder()));
+            if (mMBuss.getDeliveryRange() != null)
+                moreV.deliveryRangeValue.setText(String.valueOf(mMBuss.getDeliveryRange()));
         } else OSViewAnimation.collapse(moreV.hodContent);
-        mModifiedBusiness.setHodAvailable(isChecked);
+        mMBuss.setHodAvailable(isChecked);
     }
 
     void onClickedHodInfo(View view) {
@@ -244,7 +244,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     void onCheckFreeShipping(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) moreV.shippingCharge.setVisibility(View.INVISIBLE);
         else moreV.shippingCharge.setVisibility(View.VISIBLE);
-        mModifiedBusiness.setFsAvailable(isChecked);
+        mMBuss.setFsAvailable(isChecked);
     }
 
     private void onClickedShippingCharge(View view) {
@@ -255,8 +255,8 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         }
 
         Intent intent = new Intent(this, DeliveryChargeActivity.class);
-        if (mModifiedBusiness.getShippingCharges() != null)
-            intent.putExtra(DeliveryChargeActivity.PRE_DELIVERY_CHARGE, new Gson().toJson(mModifiedBusiness.getShippingCharges()));
+        if (mMBuss.getShippingCharges() != null)
+            intent.putExtra(DeliveryChargeActivity.PRE_DELIVERY_CHARGE, new Gson().toJson(mMBuss.getShippingCharges()));
         startActivityForResult(intent, RC_SHIPPING_CHARGE);
     }
 
@@ -268,9 +268,9 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
     void showPlacePicker(View view) {
         OSCreateLocationDialog dialog = new OSCreateLocationDialog();
-        if (mModifiedBusiness.getLocation() != null) {
+        if (mMBuss.getLocation() != null) {
             Bundle bundle = new Bundle();
-            bundle.putString(OSCreateLocationDialog.KEY_LOCATION, new Gson().toJson(mModifiedBusiness.getLocation()));
+            bundle.putString(OSCreateLocationDialog.KEY_LOCATION, new Gson().toJson(mMBuss.getLocation()));
             dialog.setArguments(bundle);
         }
         dialog.show(getSupportFragmentManager(), "");
@@ -292,21 +292,21 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             return;
         }
         if (!mVerifiedNo) {
-            verifyMobileNumber(mModifiedBusiness.getMobileNumber());
+            verifyMobileNumber(mMBuss.getMobileNumber());
             return;
         }
-        if (mModifiedBusiness.getOpeningTime() == null) {
+        if (TextUtils.isEmpty(mMBuss.getOpensAt()) || !OSTimeUtils.isValidTime(mMBuss.getOpensAt())) {
             showToast("Select opening time");
             moreV.openingTimeBtn.performClick();
             return;
         }
-        if (mModifiedBusiness.getClosingTime() == null) {
+        if (TextUtils.isEmpty(mMBuss.getClosesAt()) || !OSTimeUtils.isValidTime(mMBuss.getClosesAt())) {
             showToast("Select closing time");
             moreV.closingTimeBtn.performClick();
             return;
         }
 
-        if (mModifiedBusiness.getOpeningTime().isBuggerThan(mModifiedBusiness.getClosingTime())) {
+        if (OSTimeUtils.isFirstBugger(mMBuss.getOpensAt(), mMBuss.getClosesAt())) {
             showToast("Invalid opening or closing time");
             return;
         }
@@ -321,7 +321,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         String deliveryRange = moreV.deliveryRangeValue.getText().toString().trim();
         if (moreV.hod.isChecked()) {
             if (!moreV.freeShipping.isChecked()) {
-                if (mModifiedBusiness.getShippingCharges() == null || mModifiedBusiness.getShippingCharges().getPerOrder() == null) {
+                if (mMBuss.getShippingCharges() == null || mMBuss.getShippingCharges().getPerOrder() == null) {
                     new AlertDialog.Builder(this).setTitle("Set shipping charge")
                             .setMessage("Shipping charge is require if your business don't provide free shipping")
                             .setPositiveButton("Set Charge", ((dialog, which) -> moreV.shippingCharge.performClick()))
@@ -330,13 +330,13 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
                 }
             }
 
-            if (TextUtils.isEmpty(minOrder)) mModifiedBusiness.setMinOrder(0L);
+            if (TextUtils.isEmpty(minOrder)) mMBuss.setMinOrder(0L);
             if (TextUtils.isEmpty(deliveryRange)) {
                 moreV.deliveryRange.setError("Invalid input");
                 return;
             }
         }
-        if (mModifiedBusiness.getLocation() == null) {
+        if (mMBuss.getLocation() == null) {
             showToast("Add business location.");
             return;
         }
@@ -390,39 +390,41 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     }
 
     private void setUpUiFromBusiness() {
-        List<String> urls = mOriginalBusiness.getImageUrls();
+        List<String> urls = mOBuss.getImageUrls();
         if (urls != null && !urls.isEmpty()) {
             for (String url : urls)
                 mImageUris.add(new MenuItemImage(url, MenuItemImage.SOURCE_SERVER));
             mAdapter.notifyDataSetChanged();
         }
 
-        infoV.nameTiet.setText(mOriginalBusiness.getDisplayName());
-        infoV.typeActv.setText(mOriginalBusiness.getBusinessType());
-        contactV.mobileNoTiet.setText(mOriginalBusiness.getMobileNumber());
-        contactV.emailTiet.setText(mOriginalBusiness.getEmail());
-        contactV.websiteTiet.setText(mOriginalBusiness.getWebsite());
+        infoV.nameTiet.setText(mOBuss.getDisplayName());
+        infoV.typeActv.setText(mOBuss.getBusinessType());
+        contactV.mobileNoTiet.setText(mOBuss.getMobileNumber());
+        contactV.emailTiet.setText(mOBuss.getEmail());
+        contactV.websiteTiet.setText(mOBuss.getWebsite());
 
-        OSTime openingTime = mOriginalBusiness.getOpeningTime();
-        if (openingTime != null)
-            moreV.openingTimeTV.setText(String.format(Locale.ENGLISH, "%d:%d %s", openingTime.getHour(), openingTime.getMinute(), openingTime.getZone()));
-        OSTime closingTime = mOriginalBusiness.getClosingTime();
-        if (closingTime != null)
-            moreV.closingTimeTv.setText(String.format(Locale.ENGLISH, "%d:%d %s", closingTime.getHour(), closingTime.getMinute(), closingTime.getZone()));
-
-        if (mOriginalBusiness.getOpeningDays() != null)
-            mSelectedOpeningDays = new HashSet<>(Arrays.asList(new WeekDayHelper().decodeDays(mOriginalBusiness.getOpeningDays())));
-
-        if (mOriginalBusiness.getHodAvailable() != null && mOriginalBusiness.getHodAvailable()) {
-            moreV.hod.setChecked(mOriginalBusiness.getHodAvailable());
-            moreV.minOrderTiet.setText(String.format("%s", mOriginalBusiness.getMinOrder()));
-            moreV.deliveryRangeValue.setText(String.format("%s", mOriginalBusiness.getDeliveryRange()));
-
-            if (mOriginalBusiness.getFsAvailable() != null)
-                moreV.freeShipping.setChecked(mOriginalBusiness.getFsAvailable());
+        if (OSTimeUtils.isValidTime(mOBuss.getOpensAt())) {
+            OSTimeUtils.extractTime(mOBuss.getOpensAt(), (hr, min, zone) ->
+                    moreV.openingTimeTV.setText(String.format("%s:%s %s", hr, min, zone)));
+        }
+        if (OSTimeUtils.isValidTime(mOBuss.getClosesAt())) {
+            OSTimeUtils.extractTime(mOBuss.getClosesAt(), (hr, min, zone) ->
+                    moreV.closingTimeTv.setText(String.format("%s:%s %s", hr, min, zone)));
         }
 
-        OSLocation location = mOriginalBusiness.getLocation();
+        if (mOBuss.getOpeningDays() != null)
+            mSelectedOpeningDays = new HashSet<>(Arrays.asList(new WeekDayHelper().decodeDays(mOBuss.getOpeningDays())));
+
+        if (mOBuss.getHodAvailable() != null && mOBuss.getHodAvailable()) {
+            moreV.hod.setChecked(mOBuss.getHodAvailable());
+            moreV.minOrderTiet.setText(String.format("%s", mOBuss.getMinOrder()));
+            moreV.deliveryRangeValue.setText(String.format("%s", mOBuss.getDeliveryRange()));
+
+            if (mOBuss.getFsAvailable() != null)
+                moreV.freeShipping.setChecked(mOBuss.getFsAvailable());
+        }
+
+        OSLocation location = mOBuss.getLocation();
         if (location != null) setUpLocation(location);
     }
 
@@ -478,14 +480,14 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             case RC_SHIPPING_CHARGE: {
                 if (resultCode == RESULT_OK && data != null) {
                     String deliveryCharge = data.getStringExtra(DeliveryChargeActivity.DELIVERY_CHARGE);
-                    mModifiedBusiness.setShippingCharges(new Gson().fromJson(deliveryCharge, OSShippingCharge.class));
+                    mMBuss.setShippingCharges(new Gson().fromJson(deliveryCharge, OSShippingCharge.class));
                 }
                 break;
             }
             case RC_INTENT_VERIFY_MOBILE_NUMBER: {
                 if (resultCode == RESULT_OK && data != null) {
                     mVerifiedNo = true;
-                    mModifiedBusiness.setMobileNumber(data.getStringExtra(PhoneVerificationActivity.KEY_PHONE_NO));
+                    mMBuss.setMobileNumber(data.getStringExtra(PhoneVerificationActivity.KEY_PHONE_NO));
                     binding.submitBtn.performClick();
                 }
                 break;
@@ -508,11 +510,11 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     private void uploadBusiness() {
         loadingDialog.show();
         CollectionReference ref = FirebaseFirestore.getInstance().collection(this.getString(R.string.ref_business));
-        if (mOriginalBusiness == null) {
-            ref.add(mModifiedBusiness).addOnSuccessListener(doc -> onUploadSuccess(doc.getId())).addOnFailureListener(this::onUploadFailed);
+        if (mOBuss == null) {
+            ref.add(mMBuss).addOnSuccessListener(doc -> onUploadSuccess(doc.getId())).addOnFailureListener(this::onUploadFailed);
         } else {
-            ref.document(mOriginalBusiness.getBusinessRefId()).set(mModifiedBusiness, SetOptions.merge())
-                    .addOnSuccessListener(v -> onUploadSuccess(mOriginalBusiness.getBusinessRefId())).addOnFailureListener(this::onUploadFailed);
+            ref.document(mOBuss.getBusinessRefId()).set(mMBuss, SetOptions.merge())
+                    .addOnSuccessListener(v -> onUploadSuccess(mOBuss.getBusinessRefId())).addOnFailureListener(this::onUploadFailed);
         }
     }
 
@@ -542,7 +544,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             StorageReference ref = FirebaseStorage.getInstance().getReferenceFromUrl(menuItemImage.getImage().toString());
 
             FirebaseFirestore.getInstance().collection(getString(R.string.ref_business))
-                    .document(mOriginalBusiness.getBusinessRefId())
+                    .document(mOBuss.getBusinessRefId())
                     .update(getString(R.string.field_image_urls), FieldValue.arrayRemove(menuItemImage.getImage().toString()))
                     .addOnSuccessListener(aVoid -> {
                         mImageUris.remove(menuItemImage);
@@ -633,7 +635,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
     @Override
     public void onLocationResponse(OSLocation location) {
-        mModifiedBusiness.setLocation(location);
+        mMBuss.setLocation(location);
         setUpLocation(location);
     }
 }
