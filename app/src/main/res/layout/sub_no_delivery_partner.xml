@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/no_partner_ll"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="You have no delivery partner. \n\n Ask your delivery partner to download OnSpot Delivery app. From there they can send you the request."
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/download_osd_btn"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Download OnSpot Delivery App"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent" />
+</LinearLayout>

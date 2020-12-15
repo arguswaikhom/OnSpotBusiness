@@ -14,13 +14,11 @@ import com.crown.library.onspotlibrary.model.UnSupportedContent;
 import com.crown.library.onspotlibrary.model.business.BusinessV6;
 import com.crown.library.onspotlibrary.model.order.OSOldOrder;
 import com.crown.library.onspotlibrary.model.user.UserOSB;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.BuildConfig;
-import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.databinding.ActivityAllOrderBinding;
 import com.crown.onspotbusiness.view.ListItemAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,9 +29,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AllOrderActivity extends AppCompatActivity implements OnCompleteListener<QuerySnapshot> {
-    private static final String TAG = AllOrderActivity.class.getName();
-
+public class AllOrderActivity extends AppCompatActivity {
     private List<ListItem> mDataset;
     private ListItemAdapter mAdapter;
     private ActivityAllOrderBinding binding;
@@ -44,20 +40,33 @@ public class AllOrderActivity extends AppCompatActivity implements OnCompleteLis
         binding = ActivityAllOrderBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.toolbar.setTitle("All Order");
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setUpRecycler();
+        getOrders();
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+    private void setUpRecycler() {
+        binding.listRv.setHasFixedSize(true);
+        binding.listRv.setLayoutManager(new LinearLayoutManager(this));
+        mDataset = new ArrayList<>();
+        mAdapter = new ListItemAdapter(this, mDataset);
+        binding.listRv.setAdapter(mAdapter);
+    }
+
+    private void getOrders() {
         BusinessV6 business = OSPreferences.getInstance(getApplicationContext()).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
-        FirebaseFirestore.getInstance().collection(getString(R.string.ref_order))
-                .whereEqualTo(FieldPath.of(getString(R.string.field_business), getString(R.string.field_business_ref_id)), business.getBusinessRefId())
-                .orderBy(getString(R.string.field_ordered_at), Query.Direction.DESCENDING)
-                .get().addOnCompleteListener(this);
+        FirebaseFirestore.getInstance().collection(OSString.refOrder)
+                .whereEqualTo(FieldPath.of(OSString.fieldBusiness, OSString.fieldBusinessRefId), business.getBusinessRefId())
+                .orderBy(OSString.fieldOrderedAt, Query.Direction.DESCENDING).get()
+                .addOnSuccessListener(snapshots -> {
+                    if (snapshots == null || snapshots.isEmpty()) {
+                        handleEmptyOrder();
+                        return;
+                    }
+                    showOrders(snapshots);
+                })
+                .addOnFailureListener(e -> handleEmptyOrder());
     }
 
     @Override
@@ -69,20 +78,12 @@ public class AllOrderActivity extends AppCompatActivity implements OnCompleteLis
         return super.onOptionsItemSelected(item);
     }
 
-    private void setUpRecycler() {
-        binding.listRv.setHasFixedSize(true);
-        binding.listRv.setLayoutManager(new LinearLayoutManager(this));
-        mDataset = new ArrayList<>();
-        mAdapter = new ListItemAdapter(this, mDataset);
-        binding.listRv.setAdapter(mAdapter);
-    }
-
-    private void updateItemList(List<DocumentSnapshot> documents) {
+    private void showOrders(@NonNull QuerySnapshot snapshots) {
         mDataset.clear();
         boolean hasUnsupported = false;
         UserOSB user = OSPreferences.getInstance(getApplicationContext()).getObject(OSPreferenceKey.USER, UserOSB.class);
         UnSupportedContent unSupportedContent = new UnSupportedContent(BuildConfig.VERSION_CODE, BuildConfig.VERSION_NAME, user.getUserId(), AllOrderActivity.class.getName());
-        for (DocumentSnapshot doc : documents) {
+        for (DocumentSnapshot doc : snapshots.getDocuments()) {
             try {
                 OSOldOrder order = doc.toObject(OSOldOrder.class);
                 assert order != null;
@@ -102,32 +103,13 @@ public class AllOrderActivity extends AppCompatActivity implements OnCompleteLis
             mDataset.add(unSupportedContent);
             mDataset.addAll(temp);
         }
-
-        if (mDataset.isEmpty()) {
-            setInfoMessage("No order found");
-        } else {
-            binding.warningInclude.warningTv.setVisibility(View.GONE);
-        }
         mAdapter.notifyDataSetChanged();
+
+        if (mDataset.isEmpty()) handleEmptyOrder();
     }
 
-
-    @Override
-    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-        if (task.isSuccessful() && task.getResult() != null) {
-            List<DocumentSnapshot> docs = task.getResult().getDocuments();
-            if (docs.isEmpty()) {
-                setInfoMessage("No order found");
-            } else {
-                updateItemList(task.getResult().getDocuments());
-            }
-        } else {
-            setInfoMessage("Can't get order");
-        }
-    }
-
-    private void setInfoMessage(String msg) {
-        binding.warningInclude.warningTv.setText(msg);
-        binding.warningInclude.warningTv.setVisibility(View.VISIBLE);
+    private void handleEmptyOrder() {
+        binding.noOrderLayout.setVisibility(View.VISIBLE);
+        binding.listRv.setVisibility(View.GONE);
     }
 }

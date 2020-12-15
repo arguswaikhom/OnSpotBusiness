@@ -18,22 +18,22 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="All Order" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_rv"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            tools:listitem="@layout/li_old_order" />
     </LinearLayout>
 
-    <include
-        android:id="@+id/warning_include"
-        layout="@layout/warning_text_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="160dp"
-        app:fontFamily="sans-serif-medium"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <com.crown.library.onspotlibrary.views.OSIllustrationView
+        android:id="@+id/no_order_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        app:illustration="@drawable/ill_undraw_deliveries_131a"
+        app:text="No order history to display here" />
 </androidx.constraintlayout.widget.ConstraintLayout>

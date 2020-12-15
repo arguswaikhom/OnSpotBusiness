@@ -2,6 +2,7 @@ package com.crown.onspotbusiness.page;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,10 +13,11 @@ import com.crown.library.onspotlibrary.model.DeliveryPartnerOSB;
 import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.library.onspotlibrary.model.OSListHeader;
 import com.crown.library.onspotlibrary.model.business.BusinessOSB;
+import com.crown.library.onspotlibrary.utils.OSCommonIntents;
 import com.crown.library.onspotlibrary.utils.OSListUtils;
-import com.crown.library.onspotlibrary.utils.OSMessage;
 import com.crown.library.onspotlibrary.utils.emun.BusinessRequestStatus;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
+import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.databinding.ActivityDeliveryPartnersBinding;
 import com.crown.onspotbusiness.view.ListItemAdapter;
 
@@ -56,7 +58,7 @@ public class DeliveryPartnersActivity extends AppCompatActivity {
     private void showDataset() {
         List<DeliveryPartnerOSB> partners = business.getOsd();
         if (OSListUtils.isEmpty(partners)) {
-            OSMessage.showSBar(this, "No delivery partner found!!");
+            handleEmptyDeliveryPartners();
             return;
         }
 
@@ -83,5 +85,11 @@ public class DeliveryPartnersActivity extends AppCompatActivity {
             dataset.addAll(pendingPartners);
         }
         adapter.notifyDataSetChanged();
+    }
+
+    private void handleEmptyDeliveryPartners() {
+        binding.emptyDpLayout.setVisibility(View.VISIBLE);
+        binding.deliveryPartnerRv.setVisibility(View.GONE);
+        binding.emptyDpInclude.downloadOsdBtn.setOnClickListener(v -> OSCommonIntents.onIntentAppOnPlayStore(this, getString(R.string.package_onspot_delivery)));
     }
 }
