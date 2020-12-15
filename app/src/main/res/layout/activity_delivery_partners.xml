@@ -15,9 +15,34 @@
         android:layout_height="?attr/actionBarSize"
         app:title=" " />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/delivery_partner_rv"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/li_delivery_partner" />
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/delivery_partner_rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/li_delivery_partner" />
+
+        <LinearLayout
+            android:id="@+id/empty_dp_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_margin="16dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <com.crown.library.onspotlibrary.views.OSIllustrationView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                app:illustration="@drawable/ill_undraw_drone_delivery_5vrm" />
+
+            <include
+                android:id="@+id/empty_dp_include"
+                layout="@layout/sub_no_delivery_partner" />
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

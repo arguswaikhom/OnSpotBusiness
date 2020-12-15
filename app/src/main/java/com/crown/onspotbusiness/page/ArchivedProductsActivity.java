@@ -2,6 +2,7 @@ package com.crown.onspotbusiness.page;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.crown.library.onspotlibrary.controller.OSPreferences;
 import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.library.onspotlibrary.model.business.BusinessV0;
-import com.crown.library.onspotlibrary.utils.OSMessage;
 import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.databinding.ActivityArchivedProductsBinding;
@@ -71,10 +71,11 @@ public class ArchivedProductsActivity extends AppCompatActivity {
     private void onChangedArchiveProduct(QuerySnapshot snapshots, FirebaseFirestoreException e) {
         dataset.clear();
         if (snapshots == null || snapshots.isEmpty()) {
-            OSMessage.showSBar(this, "No product found");
+            handleEmptyArchive();
             return;
         }
 
+        showContentLayout();
         for (DocumentSnapshot doc : snapshots.getDocuments()) {
             ArchivedProduct product = doc.toObject(ArchivedProduct.class);
             if (product == null) continue;
@@ -82,5 +83,17 @@ public class ArchivedProductsActivity extends AppCompatActivity {
         }
         Collections.sort(dataset, (o1, o2) -> ((ArchivedProduct) o1).getItemName().compareToIgnoreCase(((ArchivedProduct) o2).getItemName()));
         adapter.notifyDataSetChanged();
+
+        if (dataset.isEmpty()) handleEmptyArchive();
+    }
+
+    private void handleEmptyArchive() {
+        binding.emptyArchiveLayout.setVisibility(View.VISIBLE);
+        binding.archivedProductRv.setVisibility(View.GONE);
+    }
+
+    private void showContentLayout() {
+        binding.emptyArchiveLayout.setVisibility(View.GONE);
+        binding.archivedProductRv.setVisibility(View.VISIBLE);
     }
 }

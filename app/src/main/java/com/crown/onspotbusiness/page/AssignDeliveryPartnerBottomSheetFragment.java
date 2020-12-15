@@ -115,8 +115,8 @@ public class AssignDeliveryPartnerBottomSheetFragment extends BottomSheetDialogF
 
         if (OSListUtils.isEmpty(acceptedPartners)) {
             binding.mainContent.setVisibility(View.GONE);
-            binding.noPartnerLl.setVisibility(View.VISIBLE);
-            binding.downloadOsdBtn.setOnClickListener(v -> OSCommonIntents.onIntentAppOnPlayStore(getContext(), getString(R.string.package_onspot_delivery)));
+            binding.noDeliveryPartnerInclude.noPartnerLl.setVisibility(View.VISIBLE);
+            binding.noDeliveryPartnerInclude.downloadOsdBtn.setOnClickListener(v -> OSCommonIntents.onIntentAppOnPlayStore(getContext(), getString(R.string.package_onspot_delivery)));
             return;
         }
 
