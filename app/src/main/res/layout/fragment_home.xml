@@ -28,6 +28,7 @@
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:layout_scrollFlags="scroll"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="Current Order"
             app:titleTextColor="@android:color/white" />
 
         <com.google.android.material.tabs.TabLayout

@@ -28,6 +28,7 @@ import com.crown.library.onspotlibrary.utils.OSCommonIntents;
 import com.crown.library.onspotlibrary.utils.OSInAppUrlUtils;
 import com.crown.library.onspotlibrary.utils.OSMessage;
 import com.crown.library.onspotlibrary.utils.OSRatingUtils;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.BusinessItemStatus;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.databinding.LiBusinessItemDetailsBinding;
@@ -147,8 +148,8 @@ public class BusinessItemDetailsVH extends RecyclerView.ViewHolder {
                 return true;
             case R.id.action_mbic_archive:
                 Map<String, Object> map = new HashMap<>();
-                map.put(context.getString(R.string.field_archived), true);
-                FirebaseFirestore.getInstance().collection(context.getString(R.string.ref_item))
+                map.put(OSString.fieldArchived, true);
+                FirebaseFirestore.getInstance().collection(OSString.refItem)
                         .document(item.getItemId()).update(map)
                         .addOnFailureListener(error -> OSMessage.showSToast(context, "Failed!!"));
                 return true;
@@ -168,8 +169,8 @@ public class BusinessItemDetailsVH extends RecyclerView.ViewHolder {
     private void updateAvailability(BusinessItemStatus state) {
         if (item.getStatus() == null || (item.getStatus() != null && item.getStatus() != state)) {
             Map<String, Object> map = new HashMap<>();
-            map.put(context.getString(R.string.field_status), state);
-            FirebaseFirestore.getInstance().collection(context.getString(R.string.ref_item))
+            map.put(OSString.fieldStatus, state);
+            FirebaseFirestore.getInstance().collection(OSString.refItem)
                     .document(item.getItemId()).update(map)
                     .addOnFailureListener(e -> OSMessage.showSToast(context, "Update failed"));
         }

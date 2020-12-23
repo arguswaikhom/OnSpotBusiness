@@ -19,6 +19,7 @@ import com.crown.library.onspotlibrary.controller.OSPreferences;
 import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.library.onspotlibrary.model.business.BusinessOSB;
 import com.crown.library.onspotlibrary.model.user.UserOSB;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.library.onspotlibrary.utils.emun.OrderStatus;
 import com.crown.onspotbusiness.R;
@@ -50,7 +51,6 @@ public class CurrentOrderFragment extends Fragment implements EventListener<Quer
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         setHasOptionsMenu(true);
-        binding.toolbar.setTitle("Current order");
         ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
 
         orderHelper = new CurrentOrderHelper(getContext().getApplicationContext());
@@ -78,8 +78,10 @@ public class CurrentOrderFragment extends Fragment implements EventListener<Quer
     public void onResume() {
         super.onResume();
         BusinessOSB b = OSPreferences.getInstance(getContext()).getObject(OSPreferenceKey.BUSINESS, BusinessOSB.class);
-        if (b != null && !b.getIsActive())
+        if (b != null && !b.getIsActive()) {
             binding.inactiveBusinessInclude.inactiveBusinessOib.setVisibility(View.VISIBLE);
+            binding.inactiveBusinessInclude.inactiveBusinessOib.setInfoPositiveBtnListener((dialog, which) -> startActivity(new Intent(getContext(), ModifyBusinessActivity.class)));
+        }
     }
 
     @Override
@@ -133,9 +135,9 @@ public class CurrentOrderFragment extends Fragment implements EventListener<Quer
     private void getOrder() {
         String businessRefId = OSPreferences.getInstance(getActivity().getApplicationContext()).getObject(OSPreferenceKey.USER, UserOSB.class).getBusinessRefId();
         String[] filter = new String[]{OrderStatus.ORDERED.name(), OrderStatus.ACCEPTED.name(), OrderStatus.PREPARING.name(), OrderStatus.READY.name(), OrderStatus.ON_THE_WAY.name()};
-        mCurrentOrderChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_order))
-                .whereEqualTo(FieldPath.of(getString(R.string.field_business), getString(R.string.field_business_ref_id)), businessRefId)
-                .whereIn(getString(R.string.field_status), Arrays.asList(filter))
+        mCurrentOrderChangeListener = FirebaseFirestore.getInstance().collection(OSString.refOrder)
+                .whereEqualTo(FieldPath.of(OSString.fieldBusiness, OSString.fieldBusinessRefId), businessRefId)
+                .whereIn(OSString.fieldStatus, Arrays.asList(filter))
                 .addSnapshotListener(this);
     }
 

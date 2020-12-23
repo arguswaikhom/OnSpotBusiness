@@ -32,6 +32,7 @@ import com.crown.library.onspotlibrary.utils.InputFilterMinMax;
 import com.crown.library.onspotlibrary.utils.OSImagePicker;
 import com.crown.library.onspotlibrary.utils.OSListUtils;
 import com.crown.library.onspotlibrary.utils.OSMessage;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.BusinessItemPriceUnit;
 import com.crown.library.onspotlibrary.utils.emun.OSDiscountType;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
@@ -351,14 +352,14 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
         String itemId;
         Task<Void> voidTask;
         if (originalItem == null) {
-            DocumentReference doc = FirebaseFirestore.getInstance().collection(getString(R.string.ref_item)).document();
+            DocumentReference doc = FirebaseFirestore.getInstance().collection(OSString.refItem).document();
             updatedItem.setBusinessRefId(business.getBusinessRefId());
             updatedItem.setItemId(doc.getId());
             voidTask = doc.set(updatedItem, SetOptions.merge());
             itemId = doc.getId();
         } else {
             itemId = originalItem.getItemId();
-            voidTask = FirebaseFirestore.getInstance().collection(getString(R.string.ref_item)).document(originalItem.getItemId()).set(updatedItem, SetOptions.merge());
+            voidTask = FirebaseFirestore.getInstance().collection(OSString.refItem).document(originalItem.getItemId()).set(updatedItem, SetOptions.merge());
         }
         voidTask.addOnCompleteListener(task -> loading.dismiss()).addOnSuccessListener(aVoid -> {
             uploadItemImages(itemId);
@@ -411,9 +412,9 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
         if (menuItemImage.getImageSource() == MenuItemImage.SOURCE_SERVER) {
             StorageReference ref = FirebaseStorage.getInstance().getReferenceFromUrl(menuItemImage.getImage().toString());
 
-            FirebaseFirestore.getInstance().collection(getString(R.string.ref_item))
+            FirebaseFirestore.getInstance().collection(OSString.refItem)
                     .document(updatedItem.getItemId())
-                    .update(getString(R.string.field_image_urls), FieldValue.arrayRemove(menuItemImage.getImage().toString()))
+                    .update(OSString.fieldImageUrls, FieldValue.arrayRemove(menuItemImage.getImage().toString()))
                     .addOnSuccessListener(aVoid -> {
                         mImageUris.remove(menuItemImage);
                         mAdapter.notifyDataSetChanged();
@@ -434,7 +435,7 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
 
             if (menuImage.getImageSource() == MenuItemImage.SOURCE_SERVER) continue;
             try {
-                StorageReference ref = FirebaseStorage.getInstance().getReference().child(getString(R.string.sref_item_image)).child(business.getBusinessRefId()).child(itemId);
+                StorageReference ref = FirebaseStorage.getInstance().getReference().child(OSString.bucketItemImage).child(business.getBusinessRefId()).child(itemId);
                 final StorageReference imgRef = ref.child(new Date().getTime() + "-" + getFileNameFromUri((Uri) menuImage.getImage()));
 
                 ImageCompression compression = new ImageCompression(this, (Uri) menuImage.getImage());
@@ -464,7 +465,7 @@ public class ModifyBusinessItemActivity extends AppCompatActivity implements OnC
     }
 
     private void addImageUrlToItem(String itemId, String url) {
-        String menuSubCollection = getResources().getString(R.string.ref_item);
+        String menuSubCollection = OSString.refItem;
         FirebaseFirestore.getInstance().collection(menuSubCollection)
                 .document(itemId).update("imageUrls", FieldValue.arrayUnion(url))
                 .addOnSuccessListener(obj -> Log.v(TAG, "Image added: " + url))

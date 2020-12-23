@@ -25,6 +25,7 @@ import com.crown.library.onspotlibrary.utils.BusinessItemUtils;
 import com.crown.library.onspotlibrary.utils.OSContactReacher;
 import com.crown.library.onspotlibrary.utils.OSLocationUtils;
 import com.crown.library.onspotlibrary.utils.OSMapUtils;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.OSTimeUtils;
 import com.crown.library.onspotlibrary.utils.callback.OnStringResponse;
 import com.crown.library.onspotlibrary.utils.emun.OrderStatus;
@@ -139,7 +140,7 @@ public class CurrentOrderVH extends RecyclerView.ViewHolder implements PopupMenu
     }
 
     private void update(Map<String, Object> param) {
-        FirebaseFirestore.getInstance().collection(context.getString(R.string.ref_order))
+        FirebaseFirestore.getInstance().collection(OSString.refOrder)
                 .document(order.getOrderId()).update(param)
                 .addOnFailureListener(error -> Toast.makeText(context, "Update failed!!", Toast.LENGTH_SHORT).show());
     }

@@ -63,7 +63,6 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
         binding = FragmentMenuBinding.inflate(inflater, container, false);
 
         binding.warningInclude.warningTv.setText("Create item to see here");
-        binding.toolbar.setTitle("Item");
         setHasOptionsMenu(true);
         ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
         archivedDocs = new ArrayList<>();
@@ -90,8 +89,8 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
     public void onStart() {
         super.onStart();
         BusinessV6 business = OSPreferences.getInstance(getContext().getApplicationContext()).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
-        mMenuItemChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_item))
-                .whereEqualTo(getString(R.string.field_business_ref_id), business.getBusinessRefId())
+        mMenuItemChangeListener = FirebaseFirestore.getInstance().collection(OSString.refItem)
+                .whereEqualTo(OSString.fieldBusinessRefId, business.getBusinessRefId())
                 .whereEqualTo(OSString.fieldArchived, false)
                 .addSnapshotListener(this);
     }
@@ -135,6 +134,7 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
         BusinessOSB b = OSPreferences.getInstance(getContext()).getObject(OSPreferenceKey.BUSINESS, BusinessOSB.class);
         if (b != null && !b.getIsActive()) {
             binding.inactiveBusinessInclude.inactiveBusinessOib.setVisibility(View.VISIBLE);
+            binding.inactiveBusinessInclude.inactiveBusinessOib.setInfoPositiveBtnListener((dialog, which) -> startActivity(new Intent(getContext(), ModifyBusinessActivity.class)));
         }
     }
 

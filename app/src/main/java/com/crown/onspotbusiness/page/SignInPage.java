@@ -85,6 +85,7 @@ public class SignInPage extends AppCompatActivity implements OSGoogleSignIn.OnGo
         BusinessOSB buss = new BusinessOSB();
         buss.setBusinessRefId(bussDocRef.getId());
         buss.setMobileNumber(user.getPhoneNumber());
+        buss.setEmail(user.getEmail());
         buss.setCreator(user.getUserId());
         buss.setCreatedOn(new Timestamp(new Date()));
         buss.setHolder(Collections.singletonList(new BusinessHolder(OSString.fieldOwner, user.getUserId())));

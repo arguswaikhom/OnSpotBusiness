@@ -15,9 +15,9 @@ import com.crown.library.onspotlibrary.model.OSListHeader;
 import com.crown.library.onspotlibrary.model.business.BusinessOSB;
 import com.crown.library.onspotlibrary.utils.OSCommonIntents;
 import com.crown.library.onspotlibrary.utils.OSListUtils;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.BusinessRequestStatus;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
-import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.databinding.ActivityDeliveryPartnersBinding;
 import com.crown.onspotbusiness.view.ListItemAdapter;
 
@@ -90,6 +90,6 @@ public class DeliveryPartnersActivity extends AppCompatActivity {
     private void handleEmptyDeliveryPartners() {
         binding.emptyDpLayout.setVisibility(View.VISIBLE);
         binding.deliveryPartnerRv.setVisibility(View.GONE);
-        binding.emptyDpInclude.downloadOsdBtn.setOnClickListener(v -> OSCommonIntents.onIntentAppOnPlayStore(this, getString(R.string.package_onspot_delivery)));
+        binding.emptyDpInclude.downloadOsdBtn.setOnClickListener(v -> OSCommonIntents.onIntentAppOnPlayStore(this, OSString.packageOSD));
     }
 }
