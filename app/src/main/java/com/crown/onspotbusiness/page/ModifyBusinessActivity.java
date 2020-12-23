@@ -36,8 +36,10 @@ import com.crown.library.onspotlibrary.model.OSLocation;
 import com.crown.library.onspotlibrary.model.OSShippingCharge;
 import com.crown.library.onspotlibrary.model.business.BusinessV6;
 import com.crown.library.onspotlibrary.model.user.UserOSB;
+import com.crown.library.onspotlibrary.page.PhoneVerificationActivity;
 import com.crown.library.onspotlibrary.utils.OSImagePicker;
 import com.crown.library.onspotlibrary.utils.OSMessage;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.OSTimeUtils;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.library.onspotlibrary.views.LoadingBounceDialog;
@@ -279,9 +281,10 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
     @SuppressWarnings("ConstantConditions")
     void onClickedSubmit(View btnView) {
+        boolean hasFilledAllRequired = true;
         if (TextUtils.isEmpty(infoV.nameTiet.getText().toString().trim())) {
             infoV.nameTil.setError("Input require");
-            return;
+            hasFilledAllRequired = false;
         }
         /*if (TextUtils.isEmpty(infoV.idTiet.getText().toString().trim())) {
             infoV.idTil.setError("Input require");
@@ -289,8 +292,9 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         }*/
         if (TextUtils.isEmpty(contactV.mobileNoTiet.getText().toString().trim())) {
             contactV.mobileNoTil.setError("Input require");
-            return;
+            hasFilledAllRequired = false;
         }
+        if (!hasFilledAllRequired) return;
         if (!mVerifiedNo) {
             verifyMobileNumber(mMBuss.getMobileNumber());
             return;
@@ -440,10 +444,10 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     }
 
     private void getBusinessType() {
-        FirebaseFirestore.getInstance().collection(getString(R.string.ref_crown_onspot)).document(getString(R.string.doc_business_type)).get().addOnSuccessListener(documentSnapshot -> {
+        FirebaseFirestore.getInstance().collection(OSString.refOnSpotShop).document(OSString.docBusinessType).get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 if (ModifyBusinessActivity.this.isFinishing()) return;
-                ArrayList<String> businessTypes = (ArrayList<String>) documentSnapshot.get(getString(R.string.field_business_type));
+                ArrayList<String> businessTypes = (ArrayList<String>) documentSnapshot.get(OSString.docBusinessType);
                 if (businessTypes == null) return;
                 Collections.sort(businessTypes, (String::compareToIgnoreCase));
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(ModifyBusinessActivity.this, R.layout.dropdown_menu_popup_item, businessTypes);
@@ -487,7 +491,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
             case RC_INTENT_VERIFY_MOBILE_NUMBER: {
                 if (resultCode == RESULT_OK && data != null) {
                     mVerifiedNo = true;
-                    mMBuss.setMobileNumber(data.getStringExtra(PhoneVerificationActivity.KEY_PHONE_NO));
+                    mMBuss.setMobileNumber(data.getStringExtra(PhoneVerificationActivity.PHONE_NO));
                     binding.submitBtn.performClick();
                 }
                 break;
@@ -509,7 +513,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
     private void uploadBusiness() {
         loadingDialog.show();
-        CollectionReference ref = FirebaseFirestore.getInstance().collection(this.getString(R.string.ref_business));
+        CollectionReference ref = FirebaseFirestore.getInstance().collection(OSString.refBusiness);
         if (mOBuss == null) {
             ref.add(mMBuss).addOnSuccessListener(doc -> onUploadSuccess(doc.getId())).addOnFailureListener(this::onUploadFailed);
         } else {
@@ -534,7 +538,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
     private void verifyMobileNumber(String mobileNumber) {
         Intent intent = new Intent(this, PhoneVerificationActivity.class);
-        intent.putExtra(PhoneVerificationActivity.KEY_PHONE_NO, mobileNumber.replace("+91", ""));
+        intent.putExtra(PhoneVerificationActivity.PHONE_NO, mobileNumber.replace("+91", ""));
         startActivityForResult(intent, RC_INTENT_VERIFY_MOBILE_NUMBER);
     }
 
@@ -543,9 +547,9 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
         if (menuItemImage.getImageSource() == MenuItemImage.SOURCE_SERVER) {
             StorageReference ref = FirebaseStorage.getInstance().getReferenceFromUrl(menuItemImage.getImage().toString());
 
-            FirebaseFirestore.getInstance().collection(getString(R.string.ref_business))
+            FirebaseFirestore.getInstance().collection(OSString.refBusiness)
                     .document(mOBuss.getBusinessRefId())
-                    .update(getString(R.string.field_image_urls), FieldValue.arrayRemove(menuItemImage.getImage().toString()))
+                    .update(OSString.fieldImageUrls, FieldValue.arrayRemove(menuItemImage.getImage().toString()))
                     .addOnSuccessListener(aVoid -> {
                         mImageUris.remove(menuItemImage);
                         mAdapter.notifyDataSetChanged();
@@ -576,7 +580,7 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
 
             if (menuImage.getImageSource() == MenuItemImage.SOURCE_SERVER) continue;
             try {
-                StorageReference sRef = FirebaseStorage.getInstance().getReference().child(getString(R.string.sref_business_profile)).child(businessRefId);
+                StorageReference sRef = FirebaseStorage.getInstance().getReference().child(OSString.bucketBusinessProfile).child(businessRefId);
                 final StorageReference imageSRef = sRef.child(businessRefId + "-" + user.getUserId() + "-" + new Date().getTime() + "-" + getFileNameFromUri((Uri) menuImage.getImage()));
 
                 ImageCompression compression = new ImageCompression(this, (Uri) menuImage.getImage());
@@ -607,8 +611,8 @@ public class ModifyBusinessActivity extends AppCompatActivity implements OnCardI
     }
 
     private void addImageUrlToItem(String refId, String url) {
-        FirebaseFirestore.getInstance().collection(getString(R.string.ref_business))
-                .document(refId).update("imageUrls", FieldValue.arrayUnion(url))
+        FirebaseFirestore.getInstance().collection(OSString.refBusiness)
+                .document(refId).update(OSString.fieldImageUrls, FieldValue.arrayUnion(url))
                 .addOnSuccessListener(obj -> Log.v(TAG, "Image added: " + url))
                 .addOnFailureListener(e -> Log.v(TAG, e.toString()));
     }

@@ -28,6 +28,7 @@
             android:layout_height="?attr/actionBarSize"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="My Products"
             app:titleTextColor="@android:color/white" />
 
         <androidx.core.widget.NestedScrollView

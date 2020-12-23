@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.crown.library.onspotlibrary.model.businessItem.BusinessItemOSB;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.onspotbusiness.R;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -65,7 +66,7 @@ public class BusinessItemStockUpdateDialog extends DialogFragment {
         Map<String, Object> map = new HashMap<>();
         map.put("onStock", value);
 
-        FirebaseFirestore.getInstance().collection(getString(R.string.ref_item))
+        FirebaseFirestore.getInstance().collection(OSString.refItem)
                 .document(item.getItemId())
                 .update(map)
                 .addOnFailureListener(error -> Toast.makeText(getContext(), "Update failed", Toast.LENGTH_SHORT).show());

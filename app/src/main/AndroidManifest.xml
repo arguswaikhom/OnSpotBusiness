@@ -31,9 +31,6 @@
             android:name=".page.DeliveryChargeActivity"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
-            android:name=".page.ShippingChargeActivity"
-            android:theme="@style/DialogActivity.NoActionBar" />
-        <activity
             android:name=".page.MainActivity"
             android:theme="@style/Material.NoActionBar" />
         <activity
@@ -43,9 +40,6 @@
             android:name=".page.ModifyBusinessActivity"
             android:label="Create Business"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
-        <activity
-            android:name=".page.PhoneVerificationActivity"
-            android:theme="@style/Material.NoActionBar" />
         <activity
             android:name=".page.SignInPage"
             android:theme="@style/Material.NoActionBar">

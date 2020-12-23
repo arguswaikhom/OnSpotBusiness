@@ -2,6 +2,7 @@ package com.crown.onspotbusiness.page;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -66,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
             if (doc != null && doc.exists()) {
                 BusinessOSB osb = doc.toObject(BusinessOSB.class);
                 if (osb != null) {
-
                     OSPreferences.getInstance(getApplicationContext()).setObject(osb, OSPreferenceKey.BUSINESS);
                     sendBroadcast(new Intent(getString(R.string.action_osb_business_changes)));
                 }
@@ -77,8 +77,10 @@ public class MainActivity extends AppCompatActivity {
     private void verifyDeviceToken() {
         FirebaseMessaging.getInstance().getToken().addOnSuccessListener(token -> {
             if (business == null || OSListUtils.isEmpty(business.getDeviceToken()) || !business.getDeviceToken().contains(token)) {
-                FirebaseFirestore.getInstance().collection(OSString.refBusiness).document(user.getBusinessRefId())
-                        .update(OSString.fieldDeviceToken, FieldValue.arrayUnion(token));
+                if (!TextUtils.isEmpty(user.getBusinessRefId())) {
+                    FirebaseFirestore.getInstance().collection(OSString.refBusiness).document(user.getBusinessRefId())
+                            .update(OSString.fieldDeviceToken, FieldValue.arrayUnion(token));
+                }
             }
         });
     }

@@ -18,6 +18,7 @@ import com.crown.library.onspotlibrary.model.ListItem;
 import com.crown.library.onspotlibrary.model.business.BusinessV6;
 import com.crown.library.onspotlibrary.model.notification.OSDeliveryPartnershipRequest;
 import com.crown.library.onspotlibrary.utils.ListItemType;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.view.ListItemAdapter;
@@ -82,8 +83,8 @@ public class NotificationsFragment extends Fragment implements EventListener<Que
 
     private void getNotifications() {
         BusinessV6 business = OSPreferences.getInstance(getContext().getApplicationContext()).getObject(OSPreferenceKey.BUSINESS, BusinessV6.class);
-        mNotificationsChangeListener = FirebaseFirestore.getInstance().collection(getString(R.string.ref_notification))
-                .whereArrayContains(getString(R.string.field_account), "osb::" + business.getBusinessRefId())
+        mNotificationsChangeListener = FirebaseFirestore.getInstance().collection(OSString.refNotification)
+                .whereArrayContains(OSString.fieldAccount, "osb::" + business.getBusinessRefId())
                 .addSnapshotListener(this);
     }
 
@@ -106,7 +107,7 @@ public class NotificationsFragment extends Fragment implements EventListener<Que
         mDataset.clear();
         for (DocumentSnapshot doc : documents) {
             if (doc.exists()) {
-                Long type = (Long) doc.get(getString(R.string.field_type));
+                Long type = (Long) doc.get(OSString.fieldType);
                 if (type == null) continue;
 
                 if (type == ListItemType.NOTI_DELIVERY_PARTNERSHIP_REQUEST) {
