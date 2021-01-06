@@ -52,7 +52,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Open only in your selected time"
+                            android:text="Open to receive online order"
                             android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>
@@ -82,7 +82,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Close until you open"
+                            android:text="Close to prevent online order"
                             android:textSize="12sp" />
                     </LinearLayout>
                 </LinearLayout>

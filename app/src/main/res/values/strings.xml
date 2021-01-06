@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">OnSpot Business</string>
     <string name="title_home">Home</string>
-    <string name="title_item">My Products</string>
+    <string name="title_item">My Product</string>
     <string name="title_notifications">Notifications</string>
-    <string name="domain">https://us-central1-crown-onspot.cloudfunctions.net</string>
     <string name="key_api">AIzaSyAvAjaMYJZ69Ky-gP8bsA5Eh8wj4d-iAEM</string>
     <string name="msg_phone_verification">You will get SMS with a confirmation code to this number.</string>
     <string name="action_ok">OK</string>

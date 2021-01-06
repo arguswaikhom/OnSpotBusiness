@@ -154,16 +154,19 @@ public class CurrentOrderVH extends RecyclerView.ViewHolder implements PopupMenu
         if (!binding.positiveBtn.isEnabled()) binding.positiveBtn.setEnabled(true);
 
         int totalItems = 0;
-        int finalPrice = 0;
+        //int finalPrice = 0;
         binding.orderItemOiv.clear();
         for (OSCartLite cart : order.getItems()) {
             int q = (int) (long) cart.getQuantity();
             OSPrice price = cart.getPrice();
             int itemFinalPrice = (int) BusinessItemUtils.getFinalPrice(price);
             totalItems += q;
-            finalPrice += q * itemFinalPrice;
+            //finalPrice += q * itemFinalPrice;
             binding.orderItemOiv.addChild(q, cart.getItemName(), itemFinalPrice * q);
         }
+
+        if (order.getHodAvailable())
+            binding.orderItemOiv.addChild("Delivery charge", (int) (long) order.getShippingCharge());
 
         int color = order.getStatus().getColor(context);
         if (color != 0) {
@@ -180,7 +183,7 @@ public class CurrentOrderVH extends RecyclerView.ViewHolder implements PopupMenu
         binding.orderDayTv.setText(OSTimeUtils.getDay(order.getOrderedAt().getSeconds()));
         binding.distanceAwayTv.setText(OSLocationUtils.getDistanceLine(order.getBusiness().getLocation(), customer.getLocation(), "away"));
         binding.itemCountTv.setText(String.format(Locale.ENGLISH, "%d items", totalItems));
-        binding.finalPriceTv.setText(String.format("%s %s", context.getString(R.string.inr), finalPrice));
+        binding.finalPriceTv.setText(String.format("%s %s", context.getString(R.string.inr), order.getFinalPrice()));
         binding.positiveBtn.setText(order.getStatus().getButtonText());
 
         if (delivery != null) {

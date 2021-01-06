@@ -151,6 +151,8 @@ public class BusinessItemFragment extends Fragment implements EventListener<Quer
             updateItemList(snapshots.getDocuments());
             archivedDocs = snapshots.getDocuments();
         } else {
+            mDataset.clear();
+            mAdapter.notifyDataSetChanged();
             binding.warningInclude.warningTv.setVisibility(View.VISIBLE);
         }
     }

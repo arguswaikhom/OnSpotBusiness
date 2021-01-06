@@ -1,6 +1,7 @@
 package com.crown.onspotbusiness.view.viewholder;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.text.Html;
 import android.view.View;
@@ -18,10 +19,10 @@ import com.crown.library.onspotlibrary.model.business.BusinessV0;
 import com.crown.library.onspotlibrary.model.notification.OSDeliveryPartnershipRequest;
 import com.crown.library.onspotlibrary.model.user.UserV1;
 import com.crown.library.onspotlibrary.utils.OSFirebaseDocUtils;
+import com.crown.library.onspotlibrary.utils.OSString;
 import com.crown.library.onspotlibrary.utils.emun.BusinessRequestStatus;
 import com.crown.library.onspotlibrary.utils.emun.OSPreferenceKey;
 import com.crown.library.onspotlibrary.views.LoadingBounceDialog;
-import com.crown.onspotbusiness.R;
 import com.crown.onspotbusiness.controller.AppController;
 import com.crown.onspotbusiness.databinding.NotiDeliveryPartnershipRequestBinding;
 
@@ -69,49 +70,63 @@ public class DeliveryPartnershipRequestVH extends RecyclerView.ViewHolder {
 
     void onClickedReject(View view) {
         if (osd == null) return;
-        String url = context.getString(R.string.domain) + "/rejectDPRequest/";
-        loading.show();
 
-        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, url, response -> {
-            loading.dismiss();
-            Toast.makeText(context, "Rejected", Toast.LENGTH_SHORT).show();
-        }, error -> {
-            loading.dismiss();
-            Toast.makeText(context, "Something went wrong!!", Toast.LENGTH_SHORT).show();
-        }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> param = new HashMap<>();
-                param.put("userId", osd.getUserId());
-                param.put("displayName", business.getDisplayName());
-                param.put("businessRefId", business.getBusinessRefId());
-                param.put("notificationId", request.getId());
-                return param;
-            }
-        });
+        new AlertDialog.Builder(context).setTitle("Reject request").setMessage("Are you sure you want to reject this request?")
+                .setPositiveButton("Yes", ((dialog, which) -> {
+                    loading.show();
+
+                    AppController.getInstance()
+                            .addToRequestQueue(new StringRequest(Request.Method.POST, OSString.apiRejectDPRequest, response -> {
+                                loading.dismiss();
+                                Toast.makeText(context, "Rejected", Toast.LENGTH_SHORT).show();
+                            }, error -> {
+                                loading.dismiss();
+                                Toast.makeText(context, "Something went wrong!!", Toast.LENGTH_SHORT).show();
+                            }) {
+                                @Override
+                                protected Map<String, String> getParams() {
+                                    Map<String, String> param = new HashMap<>();
+                                    param.put("userId", osd.getUserId());
+                                    param.put("displayName", business.getDisplayName());
+                                    param.put("businessRefId", business.getBusinessRefId());
+                                    param.put("notificationId", request.getId());
+                                    return param;
+                                }
+                            });
+                }))
+                .setNegativeButton("No", ((dialog, which) -> dialog.dismiss()))
+                .show();
     }
 
     void onClickedAccept(View view) {
         if (osd == null) return;
-        String url = context.getString(R.string.domain) + "/acceptDPRequest/";
-        loading.show();
 
-        AppController.getInstance().addToRequestQueue(new StringRequest(Request.Method.POST, url, response -> {
-            loading.dismiss();
-            Toast.makeText(context, "Accepted", Toast.LENGTH_SHORT).show();
-        }, error -> {
-            loading.dismiss();
-            Toast.makeText(context, "Something went wrong!!", Toast.LENGTH_SHORT).show();
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> param = new HashMap<>();
-                param.put("status", BusinessRequestStatus.ACCEPTED.name());
-                param.put("userId", osd.getUserId());
-                param.put("businessRefId", business.getBusinessRefId());
-                param.put("notificationId", request.getId());
-                return param;
-            }
-        });
+        new AlertDialog.Builder(context).setTitle("Accept request")
+                .setMessage(osd.getDisplayName() + " will be added as one of your delivery partner.")
+                .setPositiveButton("Accept", ((dialog, which) -> {
+                            loading.show();
+
+                            AppController.getInstance()
+                                    .addToRequestQueue(new StringRequest(Request.Method.POST, OSString.apiAcceptDPRequest, response -> {
+                                        loading.dismiss();
+                                        Toast.makeText(context, "Accepted", Toast.LENGTH_SHORT).show();
+                                    }, error -> {
+                                        loading.dismiss();
+                                        Toast.makeText(context, "Something went wrong!!", Toast.LENGTH_SHORT).show();
+                                    }) {
+                                        @Override
+                                        protected Map<String, String> getParams() throws AuthFailureError {
+                                            Map<String, String> param = new HashMap<>();
+                                            param.put("status", BusinessRequestStatus.ACCEPTED.name());
+                                            param.put("userId", osd.getUserId());
+                                            param.put("businessRefId", business.getBusinessRefId());
+                                            param.put("notificationId", request.getId());
+                                            return param;
+                                        }
+                                    });
+                        })
+                )
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 }

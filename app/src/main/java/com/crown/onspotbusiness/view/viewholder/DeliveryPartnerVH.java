@@ -1,9 +1,11 @@
 package com.crown.onspotbusiness.view.viewholder;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -71,30 +73,39 @@ public class DeliveryPartnerVH extends RecyclerView.ViewHolder {
 
     private void onClickedRemoveRequest(View view) {
         if (user == null || business == null) return;
-        String url = OSString.apiRejectDPRequest;
-        for (DeliveryPartnerOSB p : business.getOsd()) {
-            if (p.getUserId().equals(user.getUserId()) && p.getStatus().equalsIgnoreCase(BusinessRequestStatus.ACCEPTED.name())) {
-                url = OSString.apiCancelBusinessPartnership;
-                break;
-            }
-        }
-        loadingDialog.show();
-        OSVolley.getInstance(context).addToRequestQueue(new StringRequest(Request.Method.POST, url, response -> {
-            loadingDialog.dismiss();
-            OSMessage.showSToast(context, "Remove successfully");
-        }, error -> {
-            loadingDialog.dismiss();
-            OSMessage.showSToast(context, "Failed to remove!!");
-        }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> param = new HashMap<>();
-                param.put(OSString.keyInitiator, OSString.initiatorBusiness);
-                param.put(OSString.fieldUserId, user.getUserId());
-                param.put(OSString.fieldBusinessRefId, business.getBusinessRefId());
-                return param;
-            }
-        });
+
+        new AlertDialog.Builder(context).setTitle("Cancel partnership")
+                .setMessage(user.getDisplayName() + " will be removed from you delivery partner list.")
+                .setPositiveButton("Remove", (dialog, which) -> {
+                    String url = OSString.apiRejectDPRequest;
+                    for (DeliveryPartnerOSB p : business.getOsd()) {
+                        if (p.getUserId().equals(user.getUserId()) && p.getStatus().equalsIgnoreCase(BusinessRequestStatus.ACCEPTED.name())) {
+                            url = OSString.apiCancelBusinessPartnership;
+                            break;
+                        }
+                    }
+                    loadingDialog.show();
+                    OSVolley.getInstance(context).addToRequestQueue(new StringRequest(Request.Method.POST, url, response -> {
+                        loadingDialog.dismiss();
+                        Log.d("debug", response);
+                        OSMessage.showSToast(context, "Remove successfully");
+                    }, error -> {
+                        Log.d("debug", error + "");
+                        loadingDialog.dismiss();
+                        OSMessage.showSToast(context, "Failed to remove!!");
+                    }) {
+                        @Override
+                        protected Map<String, String> getParams() {
+                            Map<String, String> param = new HashMap<>();
+                            param.put(OSString.keyInitiator, OSString.initiatorBusiness);
+                            param.put(OSString.fieldUserId, user.getUserId());
+                            param.put(OSString.fieldBusinessRefId, business.getBusinessRefId());
+                            return param;
+                        }
+                    });
+                })
+                .setNegativeButton("No", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     private void onClickedAcceptRequest(View view) {

@@ -109,6 +109,7 @@ public class BusinessItemDetailsVH extends RecyclerView.ViewHolder {
         Menu menu = popupMenu.getMenu();
         menu.findItem(R.id.nav_mbic_modify).setVisible(false);
         menu.findItem(R.id.action_mbic_archive).setVisible(false);
+        menu.findItem(R.id.action_mbic_share_product).setVisible(false);
         popupMenu.setOnMenuItemClickListener(this::onClickedMenuItem);
         popupMenu.show();
     }
