@@ -22,26 +22,37 @@
         android:supportsRtl="true"
         android:theme="@style/Material">
         <activity
+            android:name=".page.ShareLinkActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/DialogActivity.NoActionBar" />
+        <activity
             android:name=".page.DeliveryPartnersActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Material.NoActionBar.Grey" />
         <activity
             android:name=".page.ArchivedProductsActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Material.NoActionBar" />
         <activity
             android:name=".page.DeliveryChargeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
             android:name=".page.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Material.NoActionBar" />
         <activity
             android:name=".page.AllOrderActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
             android:name=".page.ModifyBusinessActivity"
             android:label="Create Business"
+            android:screenOrientation="portrait"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
         <activity
             android:name=".page.SignInPage"
+            android:screenOrientation="portrait"
             android:theme="@style/Material.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,6 +64,7 @@
             android:name="com.schibstedspain.leku.LocationPickerActivity"
             android:label="@string/leku_title_activity_location_picker"
             android:parentActivityName=".page.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
@@ -69,6 +81,7 @@
         <activity
             android:name=".page.ModifyBusinessItemActivity"
             android:label="Add Item"
+            android:screenOrientation="portrait"
             android:theme="@style/Material.NoActionBar.GreyStatusBar" />
 
         <provider

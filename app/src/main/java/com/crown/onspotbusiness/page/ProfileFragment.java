@@ -54,7 +54,7 @@ public class ProfileFragment extends Fragment {
             startActivity(intent);
         });
         binding.contactUsOpi.setOnClickListener(v -> startActivity(new Intent(getContext(), ContactUsActivity.class)));
-        binding.shareOpi.setOnClickListener(v -> OSCommonIntents.onIntentShareAppLink(getContext()));
+        binding.shareOpi.setOnClickListener(v -> startActivity(new Intent(getContext(), ShareLinkActivity.class)));
         binding.rateThisAppOpi.setOnClickListener(v -> OSCommonIntents.onIntentAppOnPlayStore(getContext()));
         binding.logoutOpi.setOnClickListener(v -> AppController.getInstance().signOut(getActivity()));
         binding.logoutOpi.setOnClickListener(v -> AppController.getInstance().signOut(getActivity()));
